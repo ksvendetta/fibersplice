@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Circuit, Cable, InsertCircuit, getRibbonNumber, getFiberPositionInRibbon } from "@shared/schema";
+import { Circuit, Cable, InsertCircuit } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -175,19 +175,6 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
               </TableHeader>
               <TableBody>
                 {circuits.map((circuit) => {
-                  const fiberCount = circuit.fiberEnd - circuit.fiberStart + 1;
-                  const startRibbon = getRibbonNumber(circuit.fiberStart, cable.ribbonSize);
-                  const endRibbon = getRibbonNumber(circuit.fiberEnd, cable.ribbonSize);
-                  const startPos = getFiberPositionInRibbon(circuit.fiberStart, cable.ribbonSize) + 1;
-                  const endPos = getFiberPositionInRibbon(circuit.fiberEnd, cable.ribbonSize) + 1;
-                  
-                  let ribbonDisplay = "";
-                  if (startRibbon === endRibbon) {
-                    ribbonDisplay = `R${startRibbon}: ${startPos}-${endPos}`;
-                  } else {
-                    ribbonDisplay = `R${startRibbon}: ${startPos}-${cable.ribbonSize} and R${endRibbon}: 1-${endPos}`;
-                  }
-                  
                   return (
                     <TableRow key={circuit.id} data-testid={`row-circuit-${circuit.id}`}>
                       <TableCell>
@@ -201,7 +188,7 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
                         {circuit.circuitId}
                       </TableCell>
                       <TableCell className="font-mono text-sm" data-testid={`text-fiber-range-${circuit.id}`}>
-                        {ribbonDisplay}
+                        Fibers {circuit.fiberStart}-{circuit.fiberEnd}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
