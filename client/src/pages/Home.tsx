@@ -26,7 +26,7 @@ import { SpliceForm } from "@/components/SpliceForm";
 import { SpliceTable } from "@/components/SpliceTable";
 import { CableVisualization } from "@/components/CableVisualization";
 import { SpliceConnections } from "@/components/SpliceConnections";
-import { Plus, Cable as CableIcon, Network, Search, Filter } from "lucide-react";
+import { Plus, Cable as CableIcon, Network, Search, Filter, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -162,6 +162,57 @@ export default function Home() {
       id: splice.id,
       data: { isCompleted: splice.isCompleted === 1 ? 0 : 1 },
     });
+  };
+
+  const handleExportCSV = () => {
+    const csvHeaders = [
+      "Splice ID",
+      "Source Cable",
+      "Source Ribbon",
+      "Source Fibers",
+      "Destination Cable",
+      "Destination Ribbon",
+      "Destination Fibers",
+      "PON Range",
+      "Status"
+    ];
+
+    const csvRows = filteredSplices.map((splice) => {
+      const sourceCable = cables.find((c) => c.id === splice.sourceCableId);
+      const destCable = cables.find((c) => c.id === splice.destinationCableId);
+      const ponRange = splice.ponStart && splice.ponEnd 
+        ? `${splice.ponStart}-${splice.ponEnd}`
+        : "";
+      
+      return [
+        splice.id,
+        sourceCable?.name || "Unknown",
+        splice.sourceRibbon,
+        `${splice.sourceStartFiber}-${splice.sourceEndFiber}`,
+        destCable?.name || "Unknown",
+        splice.destinationRibbon,
+        `${splice.destinationStartFiber}-${splice.destinationEndFiber}`,
+        ponRange,
+        splice.isCompleted === 1 ? "Completed" : "Pending"
+      ];
+    });
+
+    const csvContent = [
+      csvHeaders.join(","),
+      ...csvRows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `splice-export-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({ title: "CSV exported successfully" });
   };
 
   const filteredCables = useMemo(() => {
@@ -343,7 +394,7 @@ export default function Home() {
                   <CardHeader>
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                       <CardTitle>Splice Connections</CardTitle>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Filter className="h-4 w-4 text-muted-foreground" />
                           <Badge
@@ -371,6 +422,16 @@ export default function Home() {
                             Pending
                           </Badge>
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleExportCSV}
+                          disabled={filteredSplices.length === 0}
+                          data-testid="button-export-csv"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Export CSV
+                        </Button>
                         <Button
                           size="sm"
                           onClick={() => {
