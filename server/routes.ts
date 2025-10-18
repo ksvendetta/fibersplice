@@ -214,6 +214,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/circuits/:id/toggle-spliced", async (req, res) => {
+    try {
+      const circuit = await storage.toggleCircuitSpliced(req.params.id);
+      if (!circuit) {
+        return res.status(404).json({ error: "Circuit not found" });
+      }
+      res.json(circuit);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to toggle circuit spliced status" });
+    }
+  });
+
   app.delete("/api/circuits/:id", async (req, res) => {
     try {
       // Get the circuit being deleted to know its cable

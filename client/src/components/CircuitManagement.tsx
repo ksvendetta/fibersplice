@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -63,6 +64,19 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
     },
     onError: () => {
       toast({ title: "Failed to delete circuit", variant: "destructive" });
+    },
+  });
+
+  const toggleSplicedMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("PATCH", `/api/circuits/${id}/toggle-spliced`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to toggle splice status", variant: "destructive" });
     },
   });
 
@@ -153,8 +167,9 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[35%]">Circuit ID</TableHead>
-                  <TableHead className="w-[50%]">Fiber Strands</TableHead>
+                  <TableHead className="w-[10%]">Spliced</TableHead>
+                  <TableHead className="w-[30%]">Circuit ID</TableHead>
+                  <TableHead className="w-[45%]">Fiber Strands</TableHead>
                   <TableHead className="w-[15%] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -175,6 +190,13 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
                   
                   return (
                     <TableRow key={circuit.id} data-testid={`row-circuit-${circuit.id}`}>
+                      <TableCell>
+                        <Checkbox
+                          checked={circuit.isSpliced === 1}
+                          onCheckedChange={() => toggleSplicedMutation.mutate(circuit.id)}
+                          data-testid={`checkbox-spliced-${circuit.id}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-mono text-sm" data-testid={`text-circuit-id-${circuit.id}`}>
                         {circuit.circuitId}
                       </TableCell>

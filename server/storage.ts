@@ -14,6 +14,7 @@ export interface IStorage {
   getCircuit(id: string): Promise<Circuit | undefined>;
   createCircuit(circuit: InsertCircuit): Promise<Circuit>;
   updateCircuit(id: string, circuit: Partial<InsertCircuit>): Promise<Circuit | undefined>;
+  toggleCircuitSpliced(id: string): Promise<Circuit | undefined>;
   deleteCircuit(id: string): Promise<boolean>;
   deleteCircuitsByCableId(cableId: string): Promise<void>;
   
@@ -104,6 +105,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(circuits.id, id))
       .returning();
     return circuit || undefined;
+  }
+
+  async toggleCircuitSpliced(id: string): Promise<Circuit | undefined> {
+    const circuit = await this.getCircuit(id);
+    if (!circuit) return undefined;
+    
+    const newSplicedStatus = circuit.isSpliced === 1 ? 0 : 1;
+    const [updatedCircuit] = await db
+      .update(circuits)
+      .set({ isSpliced: newSplicedStatus })
+      .where(eq(circuits.id, id))
+      .returning();
+    return updatedCircuit || undefined;
   }
 
   async deleteCircuit(id: string): Promise<boolean> {
