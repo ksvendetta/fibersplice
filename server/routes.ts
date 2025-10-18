@@ -602,18 +602,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Clear current data
       await storage.resetAllData();
       
-      // Restore cables and circuits
+      // Map old cable IDs to new cable IDs
+      const cableIdMap = new Map<string, string>();
+      
+      // Restore cables and build ID mapping
       for (const cable of saveData.cables) {
-        await storage.createCable({
+        const newCable = await storage.createCable({
           name: cable.name,
           fiberCount: cable.fiberCount,
           type: cable.type as "Feed" | "Distribution",
         });
+        cableIdMap.set(cable.id, newCable.id);
       }
       
+      // Restore circuits with updated cable IDs
       for (const circuit of saveData.circuits) {
+        const newCableId = cableIdMap.get(circuit.cableId);
+        if (!newCableId) continue; // Skip if cable mapping not found
+        
         await storage.createCircuit({
-          cableId: circuit.cableId,
+          cableId: newCableId,
           circuitId: circuit.circuitId,
           position: circuit.position,
           fiberStart: circuit.fiberStart,
@@ -623,6 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ message: "Save loaded successfully" });
     } catch (error) {
+      console.error("Error loading save:", error);
       res.status(500).json({ error: "Failed to load save" });
     }
   });
