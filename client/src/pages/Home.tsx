@@ -444,18 +444,18 @@ export default function Home() {
                                 const ribbonRows = [];
                                 
                                 for (let ribbonIndex = 0; ribbonIndex < ribbonCount; ribbonIndex++) {
-                                  const distFiberStart = circuit.fiberStart + (ribbonIndex * 12);
                                   const feedFiberStart = (circuit.feedFiberStart || circuit.fiberStart) + (ribbonIndex * 12);
-                                  
-                                  const distRibbon = getRibbonNumber(distFiberStart);
                                   const feedRibbon = getRibbonNumber(feedFiberStart);
-                                  
-                                  const feedRibbonColor = getColorForRibbon(feedRibbon);
-                                  const distRibbonColor = getColorForRibbon(distRibbon);
                                   
                                   // Calculate circuit range for this ribbon (12 circuits)
                                   const circuitStart = rangeStart + (ribbonIndex * 12);
                                   const circuitEnd = circuitStart + 11;
+                                  
+                                  // Distribution ribbon is based on circuit numbering, not physical position
+                                  const distRibbon = getRibbonNumber(circuitStart);
+                                  
+                                  const feedRibbonColor = getColorForRibbon(feedRibbon);
+                                  const distRibbonColor = getColorForRibbon(distRibbon);
                                   
                                   ribbonRows.push(
                                     <TableRow key={`${circuit.id}-ribbon-${ribbonIndex}`} className={rowBgColor} data-testid={`row-ribbon-${circuit.id}-${ribbonIndex}`}>
