@@ -26,6 +26,7 @@ import { SpliceForm } from "@/components/SpliceForm";
 import { SpliceTable } from "@/components/SpliceTable";
 import { CableVisualization } from "@/components/CableVisualization";
 import { SpliceConnections } from "@/components/SpliceConnections";
+import { CircuitManagement } from "@/components/CircuitManagement";
 import { Plus, Cable as CableIcon, Network, Search, Filter, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -351,6 +352,8 @@ export default function Home() {
                             </span>
                           </div>
                         </div>
+
+                        <CircuitManagement cable={selectedCable} />
 
                         <div>
                           <h3 className="text-sm font-medium mb-3">Related Splices</h3>
