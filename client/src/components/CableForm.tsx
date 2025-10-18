@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCableSchema, type InsertCable, type Cable } from "@shared/schema";
+import { insertCableSchema, type InsertCable, type Cable, cableTypes } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -9,8 +9,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -26,18 +28,20 @@ interface CableFormProps {
   isLoading?: boolean;
 }
 
-const cableTypes = ["Feed", "Cable", "Distribution"];
 const fiberCounts = [12, 24, 48, 72, 96, 144, 288];
-const ribbonSizes = [12];
 
 export function CableForm({ cable, onSubmit, onCancel, isLoading }: CableFormProps) {
   const form = useForm<InsertCable>({
     resolver: zodResolver(insertCableSchema),
-    defaultValues: cable || {
+    defaultValues: cable ? {
+      name: cable.name,
+      fiberCount: cable.fiberCount,
+      type: cable.type as "Feed" | "Distribution",
+    } : {
       name: "",
-      fiberCount: 48,
-      ribbonSize: 12,
-      type: "Cable",
+      fiberCount: 24,
+      type: "Feed",
+      circuitIds: [],
     },
   });
 
@@ -115,33 +119,34 @@ export function CableForm({ cable, onSubmit, onCancel, isLoading }: CableFormPro
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="ribbonSize"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ribbon Size</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(parseInt(value))}
-                defaultValue={field.value?.toString() || "12"}
-              >
+        {!cable && (
+          <FormField
+            control={form.control}
+            name="circuitIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Circuit IDs (Optional)</FormLabel>
                 <FormControl>
-                  <SelectTrigger data-testid="select-ribbon-size">
-                    <SelectValue placeholder="Select ribbon size" />
-                  </SelectTrigger>
+                  <Textarea
+                    placeholder="Enter circuit IDs, one per line&#10;e.g.,&#10;b,1-2&#10;n,15-16&#10;lg,33-36"
+                    value={field.value?.join('\n') || ''}
+                    onChange={(e) => {
+                      const lines = e.target.value.split('\n').map(line => line.trim()).filter(Boolean);
+                      field.onChange(lines);
+                    }}
+                    data-testid="textarea-circuit-ids"
+                    rows={6}
+                    className="font-mono text-sm"
+                  />
                 </FormControl>
-                <SelectContent>
-                  {ribbonSizes.map((size) => (
-                    <SelectItem key={size} value={size.toString()} data-testid={`option-ribbon-size-${size}`}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormDescription className="text-xs">
+                  Fiber positions will be auto-calculated based on circuit order
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex gap-2 justify-end pt-4">
           <Button

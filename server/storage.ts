@@ -42,7 +42,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         name: insertCable.name,
         fiberCount: insertCable.fiberCount,
-        ribbonSize: insertCable.ribbonSize ?? 12,
+        ribbonSize: 12, // Always 12
         type: insertCable.type,
       })
       .returning();
@@ -55,7 +55,7 @@ export class DatabaseStorage implements IStorage {
       .set({
         name: insertCable.name,
         fiberCount: insertCable.fiberCount,
-        ribbonSize: insertCable.ribbonSize ?? 12,
+        ribbonSize: 12, // Always 12
         type: insertCable.type,
       })
       .where(eq(cables.id, id))

@@ -21,12 +21,16 @@ export const fiberColors = [
 
 export type FiberColor = typeof fiberColors[number];
 
+// Cable types
+export const cableTypes = ["Feed", "Distribution"] as const;
+export type CableType = typeof cableTypes[number];
+
 // Cable table
 export const cables = pgTable("cables", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   fiberCount: integer("fiber_count").notNull(),
-  ribbonSize: integer("ribbon_size").notNull().default(12),
+  ribbonSize: integer("ribbon_size").notNull().default(12), // Always 12, not exposed in UI
   type: text("type").notNull(),
 });
 
@@ -58,7 +62,13 @@ export const splices = pgTable("splices", {
 });
 
 // Insert schemas
-export const insertCableSchema = createInsertSchema(cables).omit({ id: true });
+export const insertCableSchema = createInsertSchema(cables).omit({ 
+  id: true,
+  ribbonSize: true, // Always default to 12
+}).extend({
+  type: z.enum(cableTypes),
+  circuitIds: z.array(z.string()).optional(), // Circuit IDs to create with cable
+});
 export const insertCircuitSchema = createInsertSchema(circuits).omit({ 
   id: true,
   position: true, // Auto-calculated

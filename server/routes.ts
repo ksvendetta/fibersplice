@@ -30,6 +30,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertCableSchema.parse(req.body);
       const cable = await storage.createCable(validatedData);
+      
+      // Create circuits if provided
+      if (validatedData.circuitIds && validatedData.circuitIds.length > 0) {
+        let currentFiberStart = 1;
+        
+        for (let i = 0; i < validatedData.circuitIds.length; i++) {
+          const circuitId = validatedData.circuitIds[i];
+          
+          // Parse circuit ID to get fiber count
+          let fiberCount: number;
+          try {
+            fiberCount = parseCircuitId(circuitId);
+          } catch (error) {
+            // Skip invalid circuit IDs
+            continue;
+          }
+          
+          const fiberEnd = currentFiberStart + fiberCount - 1;
+          
+          // Validate fiber range doesn't exceed cable capacity
+          if (fiberEnd > cable.fiberCount) {
+            return res.status(400).json({ 
+              error: `Circuit "${circuitId}" requires ${fiberCount} fibers but only ${cable.fiberCount - currentFiberStart + 1} fibers remaining in cable` 
+            });
+          }
+          
+          // Create circuit
+          await storage.createCircuit({
+            cableId: cable.id,
+            circuitId: circuitId,
+            position: i,
+            fiberStart: currentFiberStart,
+            fiberEnd: fiberEnd,
+          });
+          
+          currentFiberStart = fiberEnd + 1;
+        }
+      }
+      
       res.status(201).json(cable);
     } catch (error) {
       if (error instanceof z.ZodError) {
