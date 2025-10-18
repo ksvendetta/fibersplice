@@ -130,14 +130,17 @@ Preferred communication style: Simple, everyday language.
 - Automatic filename with current date
 - Respects current filter selection (exports only visible splices)
 
-### Circuit ID Management
-- Track circuit IDs and their fiber allocations within each cable
-- Add multiple circuits per cable with custom circuit IDs (e.g., "b,1-2", "ks,219-228")
-- Fiber range validation ensures circuits stay within cable fiber count
-- Real-time validation with Pass/Fail indicator showing if circuits add up to total cable size
-- Visual feedback showing assigned/total fiber count (e.g., "24 / 24 fibers")
-- Automatic persistence of circuit data across sessions
-- Delete individual circuits to modify fiber allocations
+### Circuit ID Management (Auto-Calculated Fiber Positions)
+- **Simplified Input**: Circuit ID is the ONLY required input (e.g., "lg,33-36", "b,1-2")
+- **Auto-Calculation**: Fiber positions automatically calculated based on circuit order in the list
+  - Circuit order determines ribbon placement
+  - First circuit starts at fiber 1, subsequent circuits follow sequentially
+  - Example: "lg,33-36" as 6th circuit → auto-assigned to R2: 9-12
+- **Smart Recalculation**: Deleting a circuit automatically recalculates positions for all remaining circuits
+- **Ribbon Display**: Shows exact ribbon and fiber positions (e.g., "R1: 1-2" or "R1: 5-12 and R2: 1-2" for spanning circuits)
+- **Real-time Validation**: Pass/Fail indicator shows if circuits total exactly matches cable fiber count
+- **Visual Feedback**: Shows assigned/total fiber count (e.g., "24 / 24 fibers")
+- **Automatic Persistence**: All circuit data persists across sessions
 
 ### Print-Optimized Layout
 - Professional print styles for field technician reference
@@ -155,6 +158,9 @@ Preferred communication style: Simple, everyday language.
 - Added filter controls for splice completion status
 - Created CSV export feature for splice documentation
 - Added print-friendly CSS with @media print rules
-- Implemented circuit ID management with fiber allocation tracking
-- Added circuit validation showing pass/fail status when circuits sum to cable size
-- Created CircuitManagement component with CRUD operations for circuit IDs
+- **Implemented auto-calculated circuit management system**:
+  - Circuit ID as sole input (fiber positions calculated from order)
+  - Automatic fiber range calculation based on circuit sequence
+  - Smart recalculation when circuits are deleted
+  - Ribbon-aware position display (e.g., "R2: 9-12")
+  - Pass/fail validation for complete fiber allocation
