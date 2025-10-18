@@ -258,13 +258,18 @@ export default function Home() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {splicedCircuits.flatMap((circuit) => {
+                        {splicedCircuits.flatMap((circuit, circuitIndex) => {
                           const distributionCable = cables.find((c) => c.id === circuit.cableId);
                           const feedCable = circuit.feedCableId ? cables.find((c) => c.id === circuit.feedCableId) : undefined;
                           
+                          // Alternate background color based on circuit index
+                          const rowBgColor = circuitIndex % 2 === 0 
+                            ? "bg-white dark:bg-background" 
+                            : "bg-gray-50 dark:bg-muted/30";
+                          
                           if (!feedCable) {
                             return [(
-                              <TableRow key={circuit.id} data-testid={`row-spliced-circuit-${circuit.id}`}>
+                              <TableRow key={circuit.id} className={rowBgColor} data-testid={`row-spliced-circuit-${circuit.id}`}>
                                 <TableCell colSpan={7} className="text-center text-muted-foreground">
                                   Circuit {circuit.circuitId} in {distributionCable?.name} - No feed cable selected. Please re-check the circuit.
                                 </TableCell>
@@ -316,7 +321,7 @@ export default function Home() {
                             const ribbonColor = getColorForStrand(feedRibbon);
                             
                             fiberRows.push(
-                              <TableRow key={`${circuit.id}-fiber-${i}`} data-testid={`row-fiber-${circuit.id}-${i}`}>
+                              <TableRow key={`${circuit.id}-fiber-${i}`} className={rowBgColor} data-testid={`row-fiber-${circuit.id}-${i}`}>
                                 <TableCell className="text-center font-mono text-sm">{feedCable.fiberCount}</TableCell>
                                 <TableCell className="text-center font-mono font-semibold">{feedRibbon}</TableCell>
                                 <TableCell className="text-center">
