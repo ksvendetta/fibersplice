@@ -338,7 +338,7 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-end">
           <div className="flex-1">
             <Label htmlFor="circuitId" className="text-xs">
               Circuit ID
@@ -352,20 +352,15 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
               placeholder="e.g., lg,33-36"
               className="text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Fiber positions auto-calculated from circuit order
-            </p>
           </div>
-          <div className="flex items-end">
-            <Button
-              size="icon"
-              data-testid="button-add-circuit"
-              onClick={handleAddCircuit}
-              disabled={createCircuitMutation.isPending}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            size="icon"
+            data-testid="button-add-circuit"
+            onClick={handleAddCircuit}
+            disabled={createCircuitMutation.isPending}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
 
         {circuits.length > 0 && (

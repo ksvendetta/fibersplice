@@ -10,16 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { CableCard } from "@/components/CableCard";
 import { CableForm } from "@/components/CableForm";
 import { CableVisualization } from "@/components/CableVisualization";
@@ -43,7 +33,6 @@ export default function Home() {
   const [selectedCableId, setSelectedCableId] = useState<string | null>(null);
   const [cableDialogOpen, setCableDialogOpen] = useState(false);
   const [editingCable, setEditingCable] = useState<Cable | null>(null);
-  const [deletingCable, setDeletingCable] = useState<Cable | null>(null);
 
   const { data: cables = [], isLoading: cablesLoading } = useQuery<Cable[]>({
     queryKey: ["/api/cables"],
@@ -93,7 +82,6 @@ export default function Home() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cables"] });
       queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
-      setDeletingCable(null);
       toast({ title: "Cable deleted successfully" });
     },
     onError: () => {
@@ -170,19 +158,28 @@ export default function Home() {
                         No cables yet. Add a cable to get started.
                       </div>
                     ) : (
-                      cables.map((cable) => (
-                        <CableCard
-                          key={cable.id}
-                          cable={cable}
-                          isSelected={selectedCableId === cable.id}
-                          onSelect={() => setSelectedCableId(cable.id)}
-                          onEdit={() => {
-                            setEditingCable(cable);
-                            setCableDialogOpen(true);
-                          }}
-                          onDelete={() => setDeletingCable(cable)}
-                        />
-                      ))
+                      cables.map((cable) => {
+                        const cableCircuits = allCircuits.filter(c => c.cableId === cable.id);
+                        const totalAssignedFibers = cableCircuits.reduce((sum, circuit) => {
+                          return sum + (circuit.fiberEnd - circuit.fiberStart + 1);
+                        }, 0);
+                        const isValid = totalAssignedFibers <= cable.fiberCount;
+                        
+                        return (
+                          <CableCard
+                            key={cable.id}
+                            cable={cable}
+                            isSelected={selectedCableId === cable.id}
+                            onSelect={() => setSelectedCableId(cable.id)}
+                            onEdit={() => {
+                              setEditingCable(cable);
+                              setCableDialogOpen(true);
+                            }}
+                            onDelete={() => deleteCableMutation.mutate(cable.id)}
+                            isValid={isValid}
+                          />
+                        );
+                      })
                     )}
                   </div>
                 </ScrollArea>
@@ -361,26 +358,6 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deletingCable} onOpenChange={() => setDeletingCable(null)}>
-        <AlertDialogContent data-testid="dialog-delete-cable">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Cable</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{deletingCable?.name}"? This will also delete all
-              associated circuits. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete-cable">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deletingCable && deleteCableMutation.mutate(deletingCable.id)}
-              data-testid="button-confirm-delete-cable"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

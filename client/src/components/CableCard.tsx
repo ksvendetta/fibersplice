@@ -1,7 +1,8 @@
 import { Cable } from "@shared/schema";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Pencil, Trash2, CheckCircle2, XCircle } from "lucide-react";
 
 interface CableCardProps {
   cable: Cable;
@@ -9,9 +10,10 @@ interface CableCardProps {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  isValid: boolean;
 }
 
-export function CableCard({ cable, isSelected, onSelect, onEdit, onDelete }: CableCardProps) {
+export function CableCard({ cable, isSelected, onSelect, onEdit, onDelete, isValid }: CableCardProps) {
   return (
     <Card
       className={`cursor-pointer transition-all hover-elevate ${
@@ -57,12 +59,27 @@ export function CableCard({ cable, isSelected, onSelect, onEdit, onDelete }: Cab
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-4 text-xs">
+        <div className="space-y-2">
+          <div className="flex gap-4 text-xs">
+            <div>
+              <span className="text-muted-foreground">Cable Size:</span>
+              <span className="ml-1 font-mono font-medium" data-testid={`text-cable-fiber-count-${cable.id}`}>
+                {cable.fiberCount}
+              </span>
+            </div>
+          </div>
           <div>
-            <span className="text-muted-foreground">Cable Size:</span>
-            <span className="ml-1 font-mono font-medium" data-testid={`text-cable-fiber-count-${cable.id}`}>
-              {cable.fiberCount}
-            </span>
+            {isValid ? (
+              <Badge className="gap-1 bg-green-600 hover:bg-green-700" data-testid={`badge-cable-pass-${cable.id}`}>
+                <CheckCircle2 className="h-3 w-3" />
+                Pass
+              </Badge>
+            ) : (
+              <Badge variant="destructive" className="gap-1" data-testid={`badge-cable-fail-${cable.id}`}>
+                <XCircle className="h-3 w-3" />
+                Fail
+              </Badge>
+            )}
           </div>
         </div>
       </CardContent>
