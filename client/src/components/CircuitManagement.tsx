@@ -199,11 +199,25 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
       // Get the Feed cable for this circuit
       const feedCable = allCables.find(c => c.id === matchingFeedCircuit.cableId);
       
+      // Parse Feed circuit range to calculate the specific fiber subset
+      const feedParts = matchingFeedCircuit.circuitId.split(',');
+      const feedRangeParts = feedParts[1].trim().split('-');
+      const feedStart = parseInt(feedRangeParts[0]);
+      const feedEnd = parseInt(feedRangeParts[1]);
+      
+      // Calculate offset: where does the Distribution range start within the Feed range?
+      const offsetFromFeedStart = distStart - feedStart;
+      const offsetFromFeedEnd = distEnd - feedStart;
+      
+      // Calculate the actual Feed fiber positions for this subset
+      const calculatedFeedFiberStart = matchingFeedCircuit.fiberStart + offsetFromFeedStart;
+      const calculatedFeedFiberEnd = matchingFeedCircuit.fiberStart + offsetFromFeedEnd;
+      
       toggleSplicedMutation.mutate({
         circuitId: circuit.id,
         feedCableId: feedCable?.id,
-        feedFiberStart: matchingFeedCircuit.fiberStart,
-        feedFiberEnd: matchingFeedCircuit.fiberEnd,
+        feedFiberStart: calculatedFeedFiberStart,
+        feedFiberEnd: calculatedFeedFiberEnd,
       });
     } else {
       // Unchecking - just toggle without feed cable info
