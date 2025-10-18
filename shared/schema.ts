@@ -43,6 +43,7 @@ export const circuits = pgTable("circuits", {
   position: integer("position").notNull(), // Order in the cable (0-indexed)
   fiberStart: integer("fiber_start").notNull(), // Auto-calculated
   fiberEnd: integer("fiber_end").notNull(), // Auto-calculated
+  isSpliced: integer("is_spliced").notNull().default(0), // 0 = not spliced, 1 = spliced
 });
 
 // Splice table - represents a connection between fibers of two cables
@@ -74,6 +75,7 @@ export const insertCircuitSchema = createInsertSchema(circuits).omit({
   position: true, // Auto-calculated
   fiberStart: true, // Auto-calculated
   fiberEnd: true, // Auto-calculated
+  isSpliced: true, // Defaults to 0
 });
 export const insertSpliceSchema = createInsertSchema(splices).omit({ id: true }).refine(
   (data) => data.sourceStartFiber <= data.sourceEndFiber,
