@@ -423,7 +423,8 @@ export default function Home() {
                                   const distRibbon = getRibbonNumber(distFiberStart);
                                   const feedRibbon = getRibbonNumber(feedFiberStart);
                                   
-                                  const ribbonColor = getColorForRibbon(distRibbon);
+                                  const feedRibbonColor = getColorForRibbon(feedRibbon);
+                                  const distRibbonColor = getColorForRibbon(distRibbon);
                                   
                                   // Calculate circuit range for this ribbon (12 circuits)
                                   const circuitStart = rangeStart + (ribbonIndex * 12);
@@ -433,13 +434,13 @@ export default function Home() {
                                     <TableRow key={`${circuit.id}-ribbon-${ribbonIndex}`} className={rowBgColor} data-testid={`row-ribbon-${circuit.id}-${ribbonIndex}`}>
                                       <TableCell className="text-center font-mono text-sm">{feedCable.name} - {feedCable.fiberCount}</TableCell>
                                       <TableCell className="text-center">
-                                        <div className={`inline-block px-3 py-1 rounded border-2 border-black ${ribbonColor.bg} ${ribbonColor.text} font-mono font-semibold`}>
+                                        <div className={`inline-block px-3 py-1 rounded border-2 border-black ${feedRibbonColor.bg} ${feedRibbonColor.text} font-mono font-semibold`}>
                                           R{feedRibbon}
                                         </div>
                                       </TableCell>
                                       <TableCell className="text-center font-mono font-semibold">{circuitPrefix},{circuitStart}-{circuitEnd}</TableCell>
                                       <TableCell className="text-center">
-                                        <div className={`inline-block px-3 py-1 rounded border-2 border-black ${ribbonColor.bg} ${ribbonColor.text} font-mono font-semibold`}>
+                                        <div className={`inline-block px-3 py-1 rounded border-2 border-black ${distRibbonColor.bg} ${distRibbonColor.text} font-mono font-semibold`}>
                                           R{distRibbon}
                                         </div>
                                       </TableCell>
