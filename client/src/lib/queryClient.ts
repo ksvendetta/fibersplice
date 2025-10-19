@@ -13,6 +13,12 @@ export const getQueryFn: <T>() => QueryFunction<T> =
         return await storage.getAllCables() as any;
       case '/api/circuits':
         return await storage.getAllCircuits() as any;
+      case '/api/circuits/cable':
+        // Get circuits for a specific cable (params[0] is the cable ID)
+        if (params.length > 0) {
+          return await storage.getCircuitsByCableId(params[0]) as any;
+        }
+        throw new Error('Cable ID required for /api/circuits/cable');
       case '/api/saves':
         return await storage.getAllSaves() as any;
       default:
@@ -50,14 +56,75 @@ export async function apiRequest(
       if (resource === 'cables') {
         result = await storage.createCable(data as any);
       } else if (resource === 'circuits') {
-        result = await storage.createCircuit(data as any);
+        // Calculate circuit fiber positions before creating
+        const circuitData = data as any;
+        const cable = await storage.getCable(circuitData.cableId);
+        if (!cable) throw new Error('Cable not found');
+        
+        // Parse circuit ID to get fiber count (format: "prefix,start-end")
+        const parts = circuitData.circuitId.split(',');
+        if (parts.length !== 2) throw new Error('Invalid circuit ID format');
+        const rangeParts = parts[1].split('-');
+        if (rangeParts.length !== 2) throw new Error('Invalid range format');
+        const rangeStart = parseInt(rangeParts[0]);
+        const rangeEnd = parseInt(rangeParts[1]);
+        if (isNaN(rangeStart) || isNaN(rangeEnd)) throw new Error('Invalid range values');
+        const fiberCount = rangeEnd - rangeStart + 1;
+        
+        // Get existing circuits to calculate position and fiber start
+        const existingCircuits = await storage.getCircuitsByCableId(circuitData.cableId);
+        const position = existingCircuits.length;
+        
+        let fiberStart = 1;
+        if (existingCircuits.length > 0) {
+          const lastCircuit = existingCircuits[existingCircuits.length - 1];
+          fiberStart = lastCircuit.fiberEnd + 1;
+        }
+        
+        const fiberEnd = fiberStart + fiberCount - 1;
+        
+        // Validate fiber range
+        if (fiberEnd > cable.fiberCount) {
+          throw new Error(`Circuit requires ${fiberCount} fibers but only ${cable.fiberCount - fiberStart + 1} fibers remaining`);
+        }
+        
+        result = await storage.createCircuit({
+          ...circuitData,
+          position,
+          fiberStart,
+          fiberEnd
+        });
       } else if (resource === 'saves') {
         const { name } = data as any;
         result = await storage.createSave(name);
       }
-    } else if (method === 'PATCH') {
-      if (resource === 'circuits' && rest.includes('toggle-spliced')) {
-        await storage.updateCircuit(id, data as any);
+    } else if (method === 'PATCH' || method === 'PUT') {
+      if (resource === 'cables') {
+        // Update cable
+        await storage.updateCable(id, data as any);
+        result = { success: true };
+      } else if (resource === 'circuits' && rest.includes('toggle-spliced')) {
+        // Toggle splice status
+        const circuit = await storage.getCircuit(id);
+        if (!circuit) throw new Error('Circuit not found');
+        
+        const newSplicedStatus = circuit.isSpliced === 1 ? 0 : 1;
+        const updateData: any = { isSpliced: newSplicedStatus };
+        
+        if (newSplicedStatus === 1) {
+          // Setting to spliced - include feed cable info
+          const { feedCableId, feedFiberStart, feedFiberEnd } = data as any;
+          updateData.feedCableId = feedCableId || null;
+          updateData.feedFiberStart = feedFiberStart !== undefined ? feedFiberStart : null;
+          updateData.feedFiberEnd = feedFiberEnd !== undefined ? feedFiberEnd : null;
+        } else {
+          // Setting to unspliced - clear feed cable info
+          updateData.feedCableId = null;
+          updateData.feedFiberStart = null;
+          updateData.feedFiberEnd = null;
+        }
+        
+        await storage.updateCircuit(id, updateData);
         result = { success: true };
       } else if (resource === 'circuits') {
         await storage.updateCircuit(id, data as any);

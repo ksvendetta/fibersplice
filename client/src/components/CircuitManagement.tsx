@@ -31,11 +31,6 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
 
   const { data: circuits = [], isLoading } = useQuery<Circuit[]>({
     queryKey: ["/api/circuits/cable", cable.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/circuits/cable/${cable.id}`);
-      if (!response.ok) throw new Error("Failed to fetch circuits");
-      return response.json();
-    },
   });
 
   const { data: allCables = [] } = useQuery<Cable[]>({
@@ -383,7 +378,13 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
     { name: "aqua", bg: "bg-cyan-400", text: "text-black" },
   ];
 
-  const getColorForNumber = (num: number) => fiberColors[(num - 1) % 12];
+  const getColorForNumber = (num: number) => {
+    if (num < 1) {
+      console.error(`Invalid fiber/ribbon number: ${num}`);
+      return fiberColors[0]; // Default to blue
+    }
+    return fiberColors[(num - 1) % 12];
+  };
 
   const getRibbonAndStrandDisplay = (fiberStart: number, fiberEnd: number, ribbonSize: number) => {
     const startRibbon = Math.ceil(fiberStart / ribbonSize);

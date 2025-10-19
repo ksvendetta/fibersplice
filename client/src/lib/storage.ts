@@ -23,6 +23,10 @@ export const storage = {
     return newCable;
   },
 
+  async updateCable(id: string, updates: Partial<Cable>): Promise<void> {
+    await db.cables.update(id, updates);
+  },
+
   async deleteCable(id: string): Promise<void> {
     // Delete associated circuits first
     await db.circuits.where('cableId').equals(id).delete();

@@ -9,10 +9,10 @@ class FiberSpliceDB extends Dexie {
 
   constructor() {
     super('FiberSpliceDB');
-    this.version(1).stores({
-      cables: 'id, name, fiberCount, type',
-      circuits: 'id, cableId, circuitId, position, fiberStart, fiberEnd, isSpliced, feedCableId, feedFiberStart, feedFiberEnd',
-      saves: 'id, name, createdAt, data'
+    this.version(2).stores({
+      cables: 'id, name, type',
+      circuits: 'id, cableId, position, isSpliced',
+      saves: 'id, createdAt'
     });
   }
 }
