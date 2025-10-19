@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCableSchema, insertCircuitSchema, insertSpliceSchema, insertSettingsSchema, parseCircuitId, circuitIdsOverlap, type Circuit } from "@shared/schema";
+import { insertCableSchema, insertCircuitSchema, insertSpliceSchema, parseCircuitId, circuitIdsOverlap, type Circuit } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -29,10 +29,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cables", async (req, res) => {
     try {
       const validatedData = insertCableSchema.parse(req.body);
-      
-      // Get settings to determine ribbon/binder size
-      const settings = await storage.getSettings();
-      const ribbonSize = settings.spliceMode === "copper" ? 25 : 12;
       
       // Check for duplicate cable name
       const existingCables = await storage.getAllCables();
@@ -76,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // All validations passed, now create the cable
-      const cable = await storage.createCable(validatedData, ribbonSize);
+      const cable = await storage.createCable(validatedData);
       
       // Create circuits if provided
       if (validatedData.circuitIds && validatedData.circuitIds.length > 0) {
@@ -729,29 +725,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error loading save:", error);
       res.status(500).json({ error: "Failed to load save" });
-    }
-  });
-
-  // Settings routes
-  app.get("/api/settings", async (_req, res) => {
-    try {
-      const settings = await storage.getSettings();
-      res.json(settings);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch settings" });
-    }
-  });
-
-  app.patch("/api/settings", async (req, res) => {
-    try {
-      const validatedData = insertSettingsSchema.parse(req.body);
-      const settings = await storage.updateSettings(validatedData);
-      res.json(settings);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update settings" });
     }
   });
 

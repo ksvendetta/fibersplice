@@ -1,23 +1,12 @@
-# Cable Splicing Management Application
+# Fiber Optic Cable Splicing Management Application
 
 ## Overview
 
-This application is a professional cable splicing management tool supporting both fiber optic and copper splice modes. It features a checkbox-based system for marking circuits as spliced, allowing users to create cables with specific fiber/pair counts, define circuit IDs with auto-calculated positions, and manage splice connections. The system simplifies cable management with automatic matching and industry-standard visualizations for both fiber optic (12-fiber ribbons) and copper (25-pair binders) standards.
+This application is a professional fiber optic cable splicing management tool for tracking circuits within fiber cables. It features a checkbox-based system for marking circuits as spliced, allowing users to create cables with specific fiber counts, define circuit IDs with auto-calculated fiber positions, and manage splice connections. The system aims to simplify the process of fiber optic cable management with a focus on automatic matching and industry-standard visualizations.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-
-## Splice Mode System
-
-**Dual Mode Support:** Application supports fiber optic mode (12-fiber ribbons/strands) and copper mode (25-pair binders).
-**Mode Toggle:** Header button switches between "Fiber Splice Manager" and "Copper Splice Manager" modes.
-**Automatic Calculations:** Cable creation uses 12-fiber ribbons for fiber mode, 25-pair binders for copper mode.
-**Dynamic Terminology:** UI automatically updates labels (Ribbon/Strand for fiber, Binder/Pair for copper).
-**Color Coding:**
-- **Fiber Mode:** 12 standard fiber optic colors (blue, orange, green, brown, slate, white, red, black, yellow, violet, pink, aqua).
-- **Copper Mode:** 25-pair Ring colors for pair number (blue, orange, green, brown, slate repeating pattern), white Tip color (e.g., Pair 1 = blue Ring + white Tip).
-**Settings Persistence:** Mode stored in PostgreSQL settings table, persists across sessions.
 
 ## System Architecture
 
@@ -26,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 **Framework & Build System:** React 18 with TypeScript, Vite for fast development.
 **State Management:** TanStack Query for server state, React Hook Form with Zod for form validation.
 **UI Component System:** Shadcn UI (New York style) based on Radix UI, Tailwind CSS with a custom HSL-based color system, Material Design principles adapted for industrial use.
-**Design System Highlights:** Dark mode primary interface (deep navy-charcoal), professional blue primary color, exact HSL color specifications for fiber optic standard colors (12 colors: blue, orange, green, brown, slate, white, red, black, yellow, violet, pink, aqua) and copper Ring colors (25-pair standard), Inter and JetBrains Mono typography, responsive spacing.
+**Design System Highlights:** Dark mode primary interface (deep navy-charcoal), professional blue primary color, exact HSL color specifications for fiber optic standard colors (12 colors: blue, orange, green, brown, slate, white, red, black, yellow, violet, pink, aqua), Inter and JetBrains Mono typography, responsive spacing.
 
 ### Backend Architecture
 
@@ -41,11 +30,10 @@ Preferred communication style: Simple, everyday language.
 **Storage Implementation:** SQLite persistent local database using better-sqlite3 for offline-capable desktop application.
 **Database File:** `fiber-splice.db` stored locally, persists data across app restarts.
 **Database Schema:**
-- **Cables Table:** `id` (UUID), `name`, `fiberCount`, `ribbonSize` (12 for fiber, 25 for copper), `type` ("Feed" or "Distribution").
+- **Cables Table:** `id` (UUID), `name`, `fiberCount`, `ribbonSize` (12), `type` ("Feed" or "Distribution").
 - **Circuits Table:** `cableId`, `circuitId`, `position`, `fiberStart`, `fiberEnd`, `isSpliced` (0/1), `feedCableId` (UUID, nullable), `feedFiberStart` (nullable), `feedFiberEnd` (nullable).
 - **Saves Table:** `id` (UUID), `name` (date/time stamp), `createdAt` (timestamp), `data` (JSON string containing cables and circuits).
-- **Settings Table:** `id` (integer, always 1), `spliceMode` ("fiber" or "copper"), stores global application mode.
-- **Splices Table:** Source/destination cable mappings with ribbon/binder and fiber/pair positions.
+- **Splices Table:** Source/destination cable mappings with ribbon and fiber positions.
 - UUID primary keys, CASCADE foreign keys for automatic cleanup on cable deletion.
 **Storage Abstraction:** `IStorage` interface with `SQLiteStorage` implementation for persistent local storage.
 

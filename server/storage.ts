@@ -1,4 +1,4 @@
-import { type Cable, type InsertCable, type Circuit, type InsertCircuit, type Splice, type InsertSplice, type Save, type InsertSave, type Settings, type InsertSettings } from "@shared/schema";
+import { type Cable, type InsertCable, type Circuit, type InsertCircuit, type Splice, type InsertSplice, type Save, type InsertSave } from "@shared/schema";
 
 // Simple UUID generator
 function generateId(): string {
@@ -12,7 +12,7 @@ function generateId(): string {
 export interface IStorage {
   getAllCables(): Promise<Cable[]>;
   getCable(id: string): Promise<Cable | undefined>;
-  createCable(cable: InsertCable, ribbonSize?: number): Promise<Cable>;
+  createCable(cable: InsertCable): Promise<Cable>;
   updateCable(id: string, cable: InsertCable): Promise<Cable | undefined>;
   deleteCable(id: string): Promise<boolean>;
   
@@ -38,9 +38,6 @@ export interface IStorage {
   loadSave(id: string): Promise<{ cables: Cable[], circuits: Circuit[] } | undefined>;
   cleanupOldSaves(): Promise<void>;
   
-  getSettings(): Promise<Settings>;
-  updateSettings(settings: InsertSettings): Promise<Settings>;
-  
   resetAllData(): Promise<void>;
 }
 
@@ -50,7 +47,6 @@ export class MemStorage implements IStorage {
   private circuits: Map<string, Circuit> = new Map();
   private splices: Map<string, Splice> = new Map();
   private saves: Map<string, Save> = new Map();
-  private settings: Settings = { id: 1, spliceMode: "fiber" };
 
   // Cable operations
   async getAllCables(): Promise<Cable[]> {
@@ -61,12 +57,12 @@ export class MemStorage implements IStorage {
     return this.cables.get(id);
   }
 
-  async createCable(insertCable: InsertCable, ribbonSize: number = 12): Promise<Cable> {
+  async createCable(insertCable: InsertCable): Promise<Cable> {
     const cable: Cable = {
       id: generateId(),
       name: insertCable.name,
       fiberCount: insertCable.fiberCount,
-      ribbonSize: ribbonSize,
+      ribbonSize: 12,
       type: insertCable.type,
     };
     this.cables.set(cable.id, cable);
@@ -276,16 +272,6 @@ export class MemStorage implements IStorage {
       const savesToDelete = allSaves.slice(50);
       savesToDelete.forEach(save => this.saves.delete(save.id));
     }
-  }
-
-  // Settings operations
-  async getSettings(): Promise<Settings> {
-    return this.settings;
-  }
-
-  async updateSettings(insertSettings: InsertSettings): Promise<Settings> {
-    this.settings = { ...this.settings, ...insertSettings };
-    return this.settings;
   }
 
   async resetAllData(): Promise<void> {
