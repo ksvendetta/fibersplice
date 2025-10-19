@@ -27,17 +27,21 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 
-**ORM & Schema Management:** Drizzle ORM for type-safe PostgreSQL operations, schema-first approach with Drizzle-Zod integration.
+**Storage Implementation:** SQLite persistent local database using better-sqlite3 for offline-capable desktop application.
+**Database File:** `fiber-splice.db` stored locally, persists data across app restarts.
 **Database Schema:**
 - **Cables Table:** `id` (UUID), `name`, `fiberCount`, `ribbonSize` (12), `type` ("Feed" or "Distribution").
 - **Circuits Table:** `cableId`, `circuitId`, `position`, `fiberStart`, `fiberEnd`, `isSpliced` (0/1), `feedCableId` (UUID, nullable), `feedFiberStart` (nullable), `feedFiberEnd` (nullable).
 - **Saves Table:** `id` (UUID), `name` (date/time stamp), `createdAt` (timestamp), `data` (JSON string containing cables and circuits).
-- UUID primary keys, cascade deletion for cables and associated circuits.
-**Storage Abstraction:** `IStorage` interface with `DatabaseStorage` implementation using Drizzle ORM.
+- **Splices Table:** Source/destination cable mappings with ribbon and fiber positions.
+- UUID primary keys, CASCADE foreign keys for automatic cleanup on cable deletion.
+**Storage Abstraction:** `IStorage` interface with `SQLiteStorage` implementation for persistent local storage.
 
 ### System Design Choices & Features
 
-**Database Persistence:** Full PostgreSQL integration, all data persists, automatic schema migrations with Drizzle Kit.
+**Database Persistence:** SQLite local database file, all data persists between app launches, automatic schema initialization on first run.
+**Desktop Application Packaging:** Electron wrapper for Windows .exe distribution, includes embedded Node.js runtime and all dependencies.
+**Error Handling & Recovery:** Graceful 404 error handling for stale data, automatic cache invalidation, Refresh button for manual data sync.
 **Checkbox-Based Splicing with Automatic Range-Based Circuit Matching:**
 - Simple checkbox to mark Distribution circuits as spliced, automatically searching all Feed cables for a matching circuit using range-based matching.
 - **Range-Based Matching Logic:** Distribution circuit matches a Feed circuit if (1) both have the same prefix (part before comma), and (2) the Distribution circuit's numeric range from the circuit ID is within the Feed circuit's numeric range from the circuit ID.
