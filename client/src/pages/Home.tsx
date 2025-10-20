@@ -180,56 +180,32 @@ export default function Home() {
           return;
         }
         
-        // Load the data by making API calls
-        for (const cable of projectData.cables) {
-          await apiRequest("POST", "/api/cables", {
-            name: cable.name,
-            fiberCount: cable.fiberCount,
-            ribbonSize: cable.ribbonSize,
-            type: cable.type,
-          });
-        }
-        
-        // Refetch cables to get new IDs
-        const newCables = await queryClient.fetchQuery({ queryKey: ["/api/cables"] }) as Cable[];
-        
-        // Map old cable IDs to new cable IDs
-        const cableIdMap = new Map<string, string>();
-        projectData.cables.forEach((oldCable: Cable, index: number) => {
-          const newCable = newCables.find(c => 
-            c.name === oldCable.name && 
-            c.fiberCount === oldCable.fiberCount && 
-            c.type === oldCable.type
-          );
-          if (newCable) {
-            cableIdMap.set(oldCable.id, newCable.id);
-          }
+        console.log('Loading project data:', {
+          cablesCount: projectData.cables.length,
+          circuitsCount: projectData.circuits.length,
+          cables: projectData.cables,
+          circuits: projectData.circuits
         });
         
-        // Load circuits with new cable IDs
-        for (const circuit of projectData.circuits) {
-          const newCableId = cableIdMap.get(circuit.cableId);
-          const newFeedCableId = circuit.feedCableId ? cableIdMap.get(circuit.feedCableId) : null;
-          
-          if (newCableId) {
-            await apiRequest("POST", "/api/circuits", {
-              cableId: newCableId,
-              circuitId: circuit.circuitId,
-              position: circuit.position,
-              fiberStart: circuit.fiberStart,
-              fiberEnd: circuit.fiberEnd,
-              isSpliced: circuit.isSpliced,
-              feedCableId: newFeedCableId,
-              feedFiberStart: circuit.feedFiberStart,
-              feedFiberEnd: circuit.feedFiberEnd,
-            });
-          }
-        }
+        // Clear ALL existing data first
+        await apiRequest("DELETE", "/api/reset", undefined);
         
+        // Use direct storage to restore exact state (preserving IDs, positions, etc.)
+        const { storage } = await import("@/lib/storage");
+        const { db } = await import("@/lib/db");
+        
+        // Restore cables and circuits with their original IDs and properties
+        await db.cables.bulkAdd(projectData.cables);
+        await db.circuits.bulkAdd(projectData.circuits);
+        
+        // Invalidate queries to refresh the UI
         queryClient.invalidateQueries({ queryKey: ["/api/cables"] });
         queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
         
-        toast({ title: "Project loaded successfully" });
+        toast({ 
+          title: "Project loaded successfully",
+          description: `${projectData.cables.length} cable(s) and ${projectData.circuits.length} circuit(s) restored`
+        });
       } catch (error) {
         console.error('Load error:', error);
         toast({ title: "Failed to load project file", variant: "destructive" });
