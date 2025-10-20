@@ -45,9 +45,10 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
     mutationFn: async (data: InsertCircuit) => {
       return await apiRequest("POST", "/api/circuits", data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+    onSuccess: async () => {
+      // Force refetch to update UI
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
       setCircuitId("");
       toast({ title: "Circuit added successfully" });
     },
@@ -64,16 +65,17 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
     mutationFn: async (id: string) => {
       return await apiRequest("DELETE", `/api/circuits/${id}`, undefined);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+    onSuccess: async () => {
+      // Force refetch to update UI
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
       toast({ title: "Circuit deleted successfully" });
     },
-    onError: (error: any) => {
+    onError: async (error: any) => {
       // If circuit doesn't exist (404), still remove from UI
       if (error?.message?.includes("not found") || error?.message?.includes("404")) {
-        queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-        queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+        await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+        await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
         toast({ title: "Circuit removed from display" });
       } else {
         toast({ title: "Failed to delete circuit", variant: "destructive" });
@@ -94,15 +96,16 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
         feedFiberEnd 
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+    onSuccess: async () => {
+      // Force refetch to update UI
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
     },
-    onError: (error: any) => {
+    onError: async (error: any) => {
       // If circuit doesn't exist (404), refresh the UI
       if (error?.message?.includes("not found") || error?.message?.includes("404")) {
-        queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-        queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+        await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+        await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
         toast({ title: "Circuit not found - display refreshed", variant: "destructive" });
       } else {
         toast({ 
@@ -118,9 +121,10 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
     mutationFn: async ({ id, circuitId }: { id: string; circuitId: string }) => {
       return await apiRequest("PATCH", `/api/circuits/${id}/update-circuit-id`, { circuitId });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+    onSuccess: async () => {
+      // Force refetch to update UI with recalculated fiber positions
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
       setEditingCircuitId(null);
       setEditingCircuitValue("");
       toast({ title: "Circuit ID updated successfully" });
@@ -138,9 +142,10 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
     mutationFn: async ({ id, direction }: { id: string; direction: "up" | "down" }) => {
       return await apiRequest("PATCH", `/api/circuits/${id}/move`, { direction });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits/cable", cable.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
+    onSuccess: async () => {
+      // Force refetch to update UI with new positions and recalculated fiber positions
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits/cable", cable.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/circuits"] });
       toast({ title: "Circuit moved successfully" });
     },
     onError: () => {
