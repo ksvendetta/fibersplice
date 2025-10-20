@@ -519,13 +519,13 @@ export default function Home() {
                                             R{currentFeedRibbon}
                                           </span>
                                           <span className="font-mono font-semibold text-xs px-0.5">:</span>
-                                          <span className={`inline-block px-2 py-1 rounded border-2 ${feedStrandStartColor.colorClass} font-mono font-semibold text-xs`} style={{ borderColor: 'currentColor' }}>
+                                          <span className={`inline-block px-2 py-1 rounded border-2 border-black ${feedStrandStartColor.bg} ${feedStrandStartColor.text} font-mono font-semibold text-xs`}>
                                             {feedStrandStart}
                                           </span>
                                           {feedStrandStart !== feedStrandEnd && (
                                             <>
                                               <span className="font-mono font-semibold text-xs px-0.5">-</span>
-                                              <span className={`inline-block px-2 py-1 rounded border-2 ${feedStrandEndColor.colorClass} font-mono font-semibold text-xs`} style={{ borderColor: 'currentColor' }}>
+                                              <span className={`inline-block px-2 py-1 rounded border-2 border-black ${feedStrandEndColor.bg} ${feedStrandEndColor.text} font-mono font-semibold text-xs`}>
                                                 {feedStrandEnd}
                                               </span>
                                             </>
@@ -539,13 +539,13 @@ export default function Home() {
                                             R{currentDistRibbon}
                                           </span>
                                           <span className="font-mono font-semibold text-xs px-0.5">:</span>
-                                          <span className={`inline-block px-2 py-1 rounded border-2 ${distStrandStartColor.colorClass} font-mono font-semibold text-xs`} style={{ borderColor: 'currentColor' }}>
+                                          <span className={`inline-block px-2 py-1 rounded border-2 border-black ${distStrandStartColor.bg} ${distStrandStartColor.text} font-mono font-semibold text-xs`}>
                                             {distStrandStart}
                                           </span>
                                           {distStrandStart !== distStrandEnd && (
                                             <>
                                               <span className="font-mono font-semibold text-xs px-0.5">-</span>
-                                              <span className={`inline-block px-2 py-1 rounded border-2 ${distStrandEndColor.colorClass} font-mono font-semibold text-xs`} style={{ borderColor: 'currentColor' }}>
+                                              <span className={`inline-block px-2 py-1 rounded border-2 border-black ${distStrandEndColor.bg} ${distStrandEndColor.text} font-mono font-semibold text-xs`}>
                                                 {distStrandEnd}
                                               </span>
                                             </>
@@ -577,23 +577,25 @@ export default function Home() {
                                   const circuitNumber = rangeStart + i;
                                   const feedColor = getColorForStrand(feedStrand);
                                   const distColor = getColorForStrand(distStrand);
+                                  const feedRibbonColor = getColorForRibbon(feedRibbon);
+                                  const distRibbonColor = getColorForRibbon(distRibbon);
                                   
                                   fiberRows.push(
                                     <TableRow key={`${circuit.id}-fiber-${i}`} className={rowBgColor} data-testid={`row-fiber-${circuit.id}-${i}`}>
                                       <TableCell className="text-center font-mono text-sm">{feedCable.name} - {feedCable.fiberCount}</TableCell>
-                                      <TableCell className="text-center font-mono font-semibold">R{feedRibbon}</TableCell>
+                                      <TableCell className={`text-center font-mono font-semibold ${feedRibbonColor.colorClass}`}>R{feedRibbon}</TableCell>
                                       <TableCell className="text-center">
-                                        <div className={`inline-block px-3 py-1 rounded border-2 ${feedColor.colorClass} font-mono font-semibold`} style={{ borderColor: 'currentColor' }}>
+                                        <div className={`inline-block px-3 py-1 rounded border-2 border-black ${feedColor.bg} ${feedColor.text} font-mono font-semibold`}>
                                           {feedStrand}
                                         </div>
                                       </TableCell>
                                       <TableCell className="text-center font-mono font-semibold">{circuitPrefix},{circuitNumber}</TableCell>
                                       <TableCell className="text-center">
-                                        <div className={`inline-block px-3 py-1 rounded border-2 ${distColor.colorClass} font-mono font-semibold`} style={{ borderColor: 'currentColor' }}>
+                                        <div className={`inline-block px-3 py-1 rounded border-2 border-black ${distColor.bg} ${distColor.text} font-mono font-semibold`}>
                                           {distStrand}
                                         </div>
                                       </TableCell>
-                                      <TableCell className="text-center font-mono font-semibold">R{distRibbon}</TableCell>
+                                      <TableCell className={`text-center font-mono font-semibold ${distRibbonColor.colorClass}`}>R{distRibbon}</TableCell>
                                       <TableCell className="text-center font-mono text-sm">{distributionCable?.name} - {distributionCable?.fiberCount}</TableCell>
                                     </TableRow>
                                   );
