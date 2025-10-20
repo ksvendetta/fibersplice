@@ -174,6 +174,60 @@ export async function apiRequest(
           currentFiberStart = fiberEnd + 1;
         }
         
+        // Update splice mappings in Distribution circuits that reference this Feed cable
+        const cable = await storage.getCable(circuit.cableId);
+        if (cable?.type === 'Feed') {
+          const allDistCircuits = await storage.getAllCircuits();
+          for (const distCircuit of allDistCircuits) {
+            if (distCircuit.isSpliced === 1 && distCircuit.feedCableId === circuit.cableId) {
+              // Find the current Feed circuit this Distribution circuit is spliced to
+              const updatedFeedCircuits = await storage.getCircuitsByCableId(circuit.cableId);
+              
+              // Parse Distribution circuit ID to get the range
+              const distParts = distCircuit.circuitId.split(',');
+              if (distParts.length === 2) {
+                const distPrefix = distParts[0].trim();
+                const distRangeParts = distParts[1].trim().split('-');
+                if (distRangeParts.length === 2) {
+                  const distStart = parseInt(distRangeParts[0]);
+                  const distEnd = parseInt(distRangeParts[1]);
+                  
+                  // Find matching Feed circuit
+                  for (const feedCircuit of updatedFeedCircuits) {
+                    const feedParts = feedCircuit.circuitId.split(',');
+                    if (feedParts.length === 2) {
+                      const feedPrefix = feedParts[0].trim();
+                      if (feedPrefix === distPrefix) {
+                        const feedRangeParts = feedParts[1].trim().split('-');
+                        if (feedRangeParts.length === 2) {
+                          const feedStart = parseInt(feedRangeParts[0]);
+                          const feedEnd = parseInt(feedRangeParts[1]);
+                          
+                          // Check if Distribution range is within Feed range
+                          if (distStart >= feedStart && distEnd <= feedEnd) {
+                            // Recalculate the Feed fiber positions for this Distribution circuit
+                            const offsetFromFeedStart = distStart - feedStart;
+                            const offsetFromFeedEnd = distEnd - feedStart;
+                            const newFeedFiberStart = feedCircuit.fiberStart + offsetFromFeedStart;
+                            const newFeedFiberEnd = feedCircuit.fiberStart + offsetFromFeedEnd;
+                            
+                            // Update the Distribution circuit's splice mapping
+                            await storage.updateCircuit(distCircuit.id, {
+                              feedFiberStart: newFeedFiberStart,
+                              feedFiberEnd: newFeedFiberEnd
+                            });
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        
         result = { success: true };
       } else if (resource === 'circuits' && rest.includes('move')) {
         // Move circuit up or down and recalculate positions
@@ -223,6 +277,60 @@ export async function apiRequest(
           });
           
           currentFiberStart = fiberEnd + 1;
+        }
+        
+        // Update splice mappings in Distribution circuits that reference this Feed cable
+        const cable = await storage.getCable(circuit.cableId);
+        if (cable?.type === 'Feed') {
+          const allDistCircuits = await storage.getAllCircuits();
+          for (const distCircuit of allDistCircuits) {
+            if (distCircuit.isSpliced === 1 && distCircuit.feedCableId === circuit.cableId) {
+              // Find the current Feed circuit this Distribution circuit is spliced to
+              const updatedFeedCircuits = await storage.getCircuitsByCableId(circuit.cableId);
+              
+              // Parse Distribution circuit ID to get the range
+              const distParts = distCircuit.circuitId.split(',');
+              if (distParts.length === 2) {
+                const distPrefix = distParts[0].trim();
+                const distRangeParts = distParts[1].trim().split('-');
+                if (distRangeParts.length === 2) {
+                  const distStart = parseInt(distRangeParts[0]);
+                  const distEnd = parseInt(distRangeParts[1]);
+                  
+                  // Find matching Feed circuit
+                  for (const feedCircuit of updatedFeedCircuits) {
+                    const feedParts = feedCircuit.circuitId.split(',');
+                    if (feedParts.length === 2) {
+                      const feedPrefix = feedParts[0].trim();
+                      if (feedPrefix === distPrefix) {
+                        const feedRangeParts = feedParts[1].trim().split('-');
+                        if (feedRangeParts.length === 2) {
+                          const feedStart = parseInt(feedRangeParts[0]);
+                          const feedEnd = parseInt(feedRangeParts[1]);
+                          
+                          // Check if Distribution range is within Feed range
+                          if (distStart >= feedStart && distEnd <= feedEnd) {
+                            // Recalculate the Feed fiber positions for this Distribution circuit
+                            const offsetFromFeedStart = distStart - feedStart;
+                            const offsetFromFeedEnd = distEnd - feedStart;
+                            const newFeedFiberStart = feedCircuit.fiberStart + offsetFromFeedStart;
+                            const newFeedFiberEnd = feedCircuit.fiberStart + offsetFromFeedEnd;
+                            
+                            // Update the Distribution circuit's splice mapping
+                            await storage.updateCircuit(distCircuit.id, {
+                              feedFiberStart: newFeedFiberStart,
+                              feedFiberEnd: newFeedFiberEnd
+                            });
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
         
         result = { success: true };
