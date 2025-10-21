@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, CheckCircle2, XCircle, Edit2, Check, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, XCircle, Edit2, Check, X, ChevronUp, ChevronDown, Scan } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OcrDialog } from "./OcrDialog";
 
 interface CircuitManagementProps {
   cable: Cable;
@@ -28,6 +29,7 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
   const [circuitId, setCircuitId] = useState("");
   const [editingCircuitId, setEditingCircuitId] = useState<string | null>(null);
   const [editingCircuitValue, setEditingCircuitValue] = useState("");
+  const [ocrDialogOpen, setOcrDialogOpen] = useState(false);
 
   const { data: circuits = [], isLoading } = useQuery<Circuit[]>({
     queryKey: ["/api/circuits/cable", cable.id],
@@ -559,6 +561,15 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
             />
           </div>
           <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setOcrDialogOpen(true)}
+            title="Extract text from image (OCR)"
+            data-testid="button-open-ocr"
+          >
+            <Scan className="h-4 w-4" />
+          </Button>
+          <Button
             size="icon"
             data-testid="button-add-circuit"
             onClick={handleAddCircuit}
@@ -703,6 +714,15 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
           </div>
         )}
       </CardContent>
+
+      <OcrDialog
+        open={ocrDialogOpen}
+        onOpenChange={setOcrDialogOpen}
+        onTextExtracted={(text) => {
+          // Append extracted text to current circuit ID input
+          setCircuitId(prev => prev ? `${prev}\n${text}` : text);
+        }}
+      />
     </Card>
   );
 }

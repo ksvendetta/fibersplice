@@ -61,12 +61,20 @@ Preferred communication style: Simple, everyday language.
 **Pass/Fail Status Badges:** Cables and circuits display green "Pass" badges when total assigned fibers are within cable capacity, or red "Fail" badges when exceeded.
 **Delete Cable:** Immediate deletion without confirmation dialog.
 **File-Based Save/Load System:** 
-- "Save" button downloads current project as JSON file to user's chosen location
-- "Load" button opens file picker to restore project from JSON file
+- "Save" button opens dialog for naming project, then downloads as JSON file to user's chosen location
+- "Load" button opens file picker to restore project from JSON file (clears existing data first)
 - User controls file names and storage location (no automatic saves)
-- JSON format contains all cables and circuits
+- JSON format contains all cables and circuits with exact state preservation
 - Simple file management through operating system
 - Portable backups that can be shared across computers
+**OCR (Optical Character Recognition):**
+- Browser-based OCR using Tesseract.js (works completely offline)
+- Scan icon button next to Circuit ID input field
+- Upload images or paste screenshots from clipboard
+- Automatically extracts text from images for Circuit ID entry
+- Progress indicator shows OCR processing status
+- Edit extracted text before using
+- Best results with clear, printed text (works with English)
 **Circuit ID Management (Auto-Calculated Fiber Positions with Edit and Reorder):**
 - Simplified input: `circuitId` is the only required input.
 - Inline editing of circuit IDs with automatic recalculation of fiber positions.
@@ -87,6 +95,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 **IndexedDB Library:** Dexie (wrapper for browser IndexedDB API).
+**OCR Library:** Tesseract.js (browser-based OCR, works offline).
 **PWA:** Service worker for offline caching, manifest.json for installation.
 **Core Libraries:**
 - React ecosystem: `react`, `react-dom`, `wouter`.
