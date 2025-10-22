@@ -1,5 +1,5 @@
 // Service Worker for Fiber Splice Manager PWA
-const CACHE_NAME = 'fiber-splice-v2';
+const CACHE_NAME = 'fiber-splice-v3';
 
 // Install event - cache app shell
 self.addEventListener('install', (event) => {
@@ -43,8 +43,46 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip cross-origin requests
+  // Skip blob: URLs and data: URLs - these are for file downloads
+  if (url.protocol === 'blob:' || url.protocol === 'data:') {
+    return;
+  }
+
+  // Handle Tesseract.js CDN requests for offline OCR support
   if (url.origin !== location.origin) {
+    // Cache Tesseract.js language files from unpkg.com, jsdelivr.net, or cdn.jsdelivr.net
+    if (url.hostname.includes('unpkg.com') || 
+        url.hostname.includes('jsdelivr.net') ||
+        url.pathname.includes('tesseract')) {
+      event.respondWith(
+        caches.match(request).then((cached) => {
+          if (cached) {
+            console.log('Service Worker: Returning cached Tesseract resource:', url.pathname);
+            return cached;
+          }
+          
+          return fetch(request).then((response) => {
+            if (!response || response.status !== 200) {
+              return response;
+            }
+            
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              console.log('Service Worker: Caching Tesseract resource:', url.pathname);
+              cache.put(request, responseClone);
+            });
+            
+            return response;
+          }).catch((error) => {
+            console.error('Service Worker: Failed to fetch Tesseract resource:', url.pathname, error);
+            throw error;
+          });
+        })
+      );
+      return;
+    }
+    
+    // Skip all other cross-origin requests
     return;
   }
 
