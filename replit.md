@@ -75,11 +75,18 @@ Preferred communication style: Simple, everyday language.
   2. **Upload** - Choose image file from computer
 - **Snip Part of Screen Workflow (Recommended):** Use OS snipping tool (Win+Shift+S or Cmd+Shift+4) to select screen region, then click Paste button in OCR dialog
 - Automatically extracts text from images for Circuit ID entry
+- **OCR Text Cleaning (Auto-Applied):** Removes NC, text in (), text in <>, changes @ to 0, removes text after valid circuit ID
+  - Example: "BR@21,365-372 NC" → "BR021,365-372"
+  - Example: "(A,13-36) <A@5BQRT> BR@21,397-420" → "BR021,397-420"
+  - Example: "A,61-144 NC A Peake" → "A,61-144"
 - Progress indicator shows OCR processing status (0-100%)
 - Edit extracted text before using
 - Best results with clear, printed text (works with English)
 **Circuit ID Management (Auto-Calculated Fiber Positions with Edit and Reorder):**
 - Simplified input: `circuitId` is the only required input.
+- **Space Separator Support:** Allows spaces instead of commas/dashes (e.g., "G 1 10" → "G,1-10", "BR 21 365 372" → "BR21,365-372")
+  - Pattern: All parts except last two = prefix (joined), last two = start-end
+  - Works in both Circuit Management input and Cable Form textarea
 - Inline editing of circuit IDs with automatic recalculation of fiber positions.
 - Circuit reordering with arrow buttons, triggering automatic recalculation of fiber positions.
 - Auto-calculation of fiber positions based on circuit order.

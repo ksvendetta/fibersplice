@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Scan } from "lucide-react";
 import { OcrDialog } from "./OcrDialog";
+import { normalizeCircuitId } from "@/lib/circuitIdUtils";
 
 interface CableFormProps {
   cable?: Cable;
@@ -47,10 +48,19 @@ export function CableForm({ cable, onSubmit, onCancel, isLoading }: CableFormPro
       circuitIds: [],
     },
   });
+  
+  // Custom submit handler that normalizes circuit IDs
+  const handleFormSubmit = (data: InsertCable) => {
+    // Normalize circuit IDs if they exist
+    if (data.circuitIds && data.circuitIds.length > 0) {
+      data.circuitIds = data.circuitIds.map(id => normalizeCircuitId(id.trim()));
+    }
+    onSubmit(data);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -136,7 +146,7 @@ export function CableForm({ cable, onSubmit, onCancel, isLoading }: CableFormPro
                 </div>
                 <FormControl>
                   <Textarea
-                    placeholder="Enter circuit IDs, one per line&#10;e.g.,&#10;b,1-2&#10;n,15-16&#10;lg,33-36"
+                    placeholder="Enter circuit IDs, one per line&#10;e.g.,&#10;b,1-2 or b 1 2&#10;n,15-16 or n 15 16&#10;lg,33-36 or lg 33 36"
                     value={field.value?.join('\n') || ''}
                     onChange={(e) => {
                       const lines = e.target.value.split('\n');
@@ -148,7 +158,7 @@ export function CableForm({ cable, onSubmit, onCancel, isLoading }: CableFormPro
                   />
                 </FormControl>
                 <FormDescription className="text-xs">
-                  Fiber positions will be auto-calculated based on circuit order
+                  Use spaces or standard format (prefix,start-end). Fiber positions will be auto-calculated.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

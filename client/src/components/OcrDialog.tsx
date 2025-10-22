@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Camera, Upload, Copy, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cleanOcrText } from "@/lib/circuitIdUtils";
 
 interface OcrDialogProps {
   open: boolean;
@@ -90,12 +91,8 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
 
       const { data: { text } } = await worker.recognize(selectedImage);
       
-      // Clean up the text (remove extra whitespace, normalize line breaks)
-      const cleanedText = text
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .join('\n');
+      // Clean the OCR text using the circuit ID cleaning function
+      const cleanedText = cleanOcrText(text);
       
       setExtractedText(cleanedText);
       

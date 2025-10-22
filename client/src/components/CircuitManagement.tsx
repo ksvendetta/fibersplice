@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { OcrDialog } from "./OcrDialog";
+import { normalizeCircuitId } from "@/lib/circuitIdUtils";
 
 interface CircuitManagementProps {
   cable: Cable;
@@ -320,7 +321,10 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
       return;
     }
     
-    const validation = parseAndCheckCircuitId(editingCircuitValue.trim(), circuitId);
+    // Normalize the circuit ID (convert spaces to proper separators)
+    const normalizedId = normalizeCircuitId(editingCircuitValue.trim());
+    
+    const validation = parseAndCheckCircuitId(normalizedId, circuitId);
     if (!validation.valid) {
       toast({
         title: "Invalid Circuit ID",
@@ -330,7 +334,7 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
       return;
     }
     
-    updateCircuitIdMutation.mutate({ id: circuitId, circuitId: editingCircuitValue });
+    updateCircuitIdMutation.mutate({ id: circuitId, circuitId: normalizedId });
   };
 
   const handleAddCircuit = () => {
@@ -343,7 +347,10 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
       return;
     }
 
-    const validation = parseAndCheckCircuitId(circuitId.trim());
+    // Normalize the circuit ID (convert spaces to proper separators)
+    const normalizedId = normalizeCircuitId(circuitId.trim());
+    
+    const validation = parseAndCheckCircuitId(normalizedId);
     if (!validation.valid) {
       toast({
         title: "Invalid Circuit ID",
@@ -355,7 +362,7 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
 
     createCircuitMutation.mutate({
       cableId: cable.id,
-      circuitId: circuitId.trim(),
+      circuitId: normalizedId,
     });
   };
 
@@ -556,7 +563,7 @@ export function CircuitManagement({ cable }: CircuitManagementProps) {
               value={circuitId}
               onChange={(e) => setCircuitId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddCircuit()}
-              placeholder="e.g., lg,33-36"
+              placeholder="e.g., lg,33-36 or lg 33 36"
               className="text-sm"
             />
           </div>
