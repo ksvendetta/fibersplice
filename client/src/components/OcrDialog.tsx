@@ -325,20 +325,32 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
 
           {/* Help Text */}
           {!selectedImage && (
-            <div className="text-sm text-muted-foreground space-y-2 border rounded-md p-4 bg-muted/50">
-              <p className="font-medium">Three ways to add an image:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li><strong>Upload:</strong> Choose an image file from your computer</li>
-                <li><strong>Paste:</strong> Copy screenshot to clipboard (Win+Shift+S / Cmd+Shift+4), then click Paste</li>
-                <li><strong>Capture:</strong> Select a window or screen to capture in real-time</li>
-              </ul>
-              <p className="font-medium mt-3">Tips for best OCR results:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>Use clear, high-contrast images</li>
-                <li>Ensure text is horizontal and legible</li>
-                <li>Avoid blurry or distorted images</li>
-                <li>Works best with printed text (not handwriting)</li>
-              </ul>
+            <div className="text-sm text-muted-foreground space-y-3 border rounded-md p-4 bg-muted/50">
+              <div className="bg-primary/10 border border-primary/20 rounded p-3">
+                <p className="font-semibold text-primary mb-2">💡 Recommended: Snip Part of Screen</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li><strong>Windows:</strong> Press <kbd className="px-2 py-1 bg-background border rounded text-xs">Win+Shift+S</kbd> → Drag to select region</li>
+                  <li><strong>Mac:</strong> Press <kbd className="px-2 py-1 bg-background border rounded text-xs">Cmd+Shift+4</kbd> → Drag to select region</li>
+                  <li>Click <strong>"Paste"</strong> button above → Your snippet appears!</li>
+                </ol>
+              </div>
+              
+              <div>
+                <p className="font-medium">Other options:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                  <li><strong>Upload:</strong> Choose a saved image file</li>
+                  <li><strong>Capture:</strong> Select entire window/screen/tab</li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-medium">Tips for best OCR results:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                  <li>Use clear, high-contrast images</li>
+                  <li>Ensure text is horizontal and legible</li>
+                  <li>Works best with printed text (not handwriting)</li>
+                </ul>
+              </div>
             </div>
           )}
         </div>
