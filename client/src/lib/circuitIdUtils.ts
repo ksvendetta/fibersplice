@@ -33,14 +33,12 @@ export function normalizeCircuitId(input: string): string {
  * 2. Remove everything inside parentheses ()
  * 3. Remove everything inside angle brackets <>
  * 4. Change @ to 0
- * 5. After all operations, keep only valid circuit ID (prefix number-number)
+ * 5. After all operations, keep only valid circuit ID (handles both formats)
  * 
- * Example:
- * Input: "BR@21,365-372 NC"
- * Output: "BR021,365-372"
- * 
- * Input: "(A,13-36) <A@5BQRT> BR@21,397-420"
- * Output: "BR021,397-420"
+ * Supports two formats:
+ * - "BR@21,365-372 NC" → "BR021,365-372"
+ * - "B 101 150 NC" → "B 101 150"
+ * - "(A,13-36) <A@5BQRT> BR@21,397-420" → "BR021,397-420"
  */
 export function cleanOcrText(text: string): string {
   if (!text || !text.trim()) return '';
@@ -64,18 +62,30 @@ export function cleanOcrText(text: string): string {
     // 4. Change @ to 0
     line = line.replace(/@/g, '0');
     
-    // 5. Extract valid circuit ID pattern: prefix,number-number
-    // Pattern: one or more letters/numbers (prefix), comma, number, dash, number
-    // This captures the circuit ID and ignores everything after it
-    const circuitIdPattern = /([A-Za-z0-9]+),(\d+)-(\d+)/;
-    const match = line.match(circuitIdPattern);
+    // 5. Extract valid circuit ID - try both formats
+    // Format 1: prefix,number-number (comma-dash format)
+    const commaDashPattern = /([A-Za-z0-9]+),(\d+)-(\d+)/;
+    const commaDashMatch = line.match(commaDashPattern);
     
-    if (match) {
-      // Found a valid circuit ID - use it and ignore the rest of the line
-      const prefix = match[1];
-      const start = match[2];
-      const end = match[3];
+    if (commaDashMatch) {
+      const prefix = commaDashMatch[1];
+      const start = commaDashMatch[2];
+      const end = commaDashMatch[3];
       cleanedLines.push(`${prefix},${start}-${end}`);
+      continue;
+    }
+    
+    // Format 2: prefix number number (space-separated format)
+    // Match: optional letters/numbers, then whitespace, then number, then whitespace, then number
+    const spacePattern = /^([A-Za-z0-9]*)\s+(\d+)\s+(\d+)/;
+    const spaceMatch = line.trim().match(spacePattern);
+    
+    if (spaceMatch) {
+      const prefix = spaceMatch[1] || '';
+      const start = spaceMatch[2];
+      const end = spaceMatch[3];
+      // Keep space format as-is (will be normalized later)
+      cleanedLines.push(`${prefix} ${start} ${end}`.trim());
     }
   }
   
