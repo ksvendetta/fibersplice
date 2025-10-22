@@ -24,7 +24,7 @@ import { CableCard } from "@/components/CableCard";
 import { CableForm } from "@/components/CableForm";
 import { CableVisualization } from "@/components/CableVisualization";
 import { CircuitManagement } from "@/components/CircuitManagement";
-import { Plus, Cable as CableIcon, Workflow, Save, Upload, RotateCcw, Edit2 } from "lucide-react";
+import { Plus, Cable as CableIcon, Workflow, Save, Upload, RotateCcw, Edit2, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -43,6 +43,10 @@ export default function Home() {
   const [selectedCableId, setSelectedCableId] = useState<string | null>(null);
   const [cableDialogOpen, setCableDialogOpen] = useState(false);
   const [editingCable, setEditingCable] = useState<Cable | null>(null);
+  const [editingType, setEditingType] = useState(false);
+  const [editingSize, setEditingSize] = useState(false);
+  const [tempType, setTempType] = useState<"Feed" | "Distribution">("Feed");
+  const [tempSize, setTempSize] = useState<number>(144);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [saveFileName, setSaveFileName] = useState("");
@@ -380,35 +384,125 @@ export default function Home() {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div className="flex items-center gap-2">
                             <span className="text-muted-foreground">Type:</span>
-                            <span className="ml-2 font-medium">{selectedCable.type}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => {
-                                setEditingCable(selectedCable);
-                                setCableDialogOpen(true);
-                              }}
-                              data-testid="button-edit-type"
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
+                            {editingType ? (
+                              <>
+                                <select
+                                  value={tempType}
+                                  onChange={(e) => setTempType(e.target.value as "Feed" | "Distribution")}
+                                  className="ml-2 px-2 py-1 border rounded text-sm"
+                                  data-testid="select-edit-type"
+                                  autoFocus
+                                >
+                                  <option value="Feed">Feed</option>
+                                  <option value="Distribution">Distribution</option>
+                                </select>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6"
+                                  onClick={() => {
+                                    updateCableMutation.mutate({
+                                      id: selectedCable.id,
+                                      data: {
+                                        name: selectedCable.name,
+                                        fiberCount: selectedCable.fiberCount,
+                                        type: tempType,
+                                      }
+                                    });
+                                    setEditingType(false);
+                                  }}
+                                  data-testid="button-save-type"
+                                >
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6"
+                                  onClick={() => setEditingType(false)}
+                                  data-testid="button-cancel-type"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <span className="ml-2 font-medium">{selectedCable.type}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => {
+                                    setTempType(selectedCable.type as "Feed" | "Distribution");
+                                    setEditingType(true);
+                                  }}
+                                  data-testid="button-edit-type"
+                                >
+                                  <Edit2 className="h-3 w-3" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-muted-foreground">Cable Size:</span>
-                            <span className="ml-2 font-mono font-medium">{selectedCable.fiberCount}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => {
-                                setEditingCable(selectedCable);
-                                setCableDialogOpen(true);
-                              }}
-                              data-testid="button-edit-size"
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
+                            {editingSize ? (
+                              <>
+                                <input
+                                  type="number"
+                                  value={tempSize}
+                                  onChange={(e) => setTempSize(parseInt(e.target.value) || 0)}
+                                  className="ml-2 w-20 px-2 py-1 border rounded text-sm font-mono"
+                                  data-testid="input-edit-size"
+                                  autoFocus
+                                  min="12"
+                                  step="12"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6"
+                                  onClick={() => {
+                                    updateCableMutation.mutate({
+                                      id: selectedCable.id,
+                                      data: {
+                                        name: selectedCable.name,
+                                        fiberCount: tempSize,
+                                        type: selectedCable.type as "Feed" | "Distribution",
+                                      }
+                                    });
+                                    setEditingSize(false);
+                                  }}
+                                  data-testid="button-save-size"
+                                >
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6"
+                                  onClick={() => setEditingSize(false)}
+                                  data-testid="button-cancel-size"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <span className="ml-2 font-mono font-medium">{selectedCable.fiberCount}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => {
+                                    setTempSize(selectedCable.fiberCount);
+                                    setEditingSize(true);
+                                  }}
+                                  data-testid="button-edit-size"
+                                >
+                                  <Edit2 className="h-3 w-3" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
 
