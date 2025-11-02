@@ -24,7 +24,8 @@ import { CableCard } from "@/components/CableCard";
 import { CableForm } from "@/components/CableForm";
 import { CableVisualization } from "@/components/CableVisualization";
 import { CircuitManagement } from "@/components/CircuitManagement";
-import { Plus, Cable as CableIcon, Workflow, Save, Upload, RotateCcw, Edit2, Check, X } from "lucide-react";
+import { DebugTab } from "@/components/DebugTab";
+import { Plus, Cable as CableIcon, Workflow, Save, Upload, RotateCcw, Edit2, Check, X, Bug } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { logger } from "@/lib/logger";
@@ -315,6 +316,10 @@ export default function Home() {
                 Splice {distCable.name}
               </TabsTrigger>
             ))}
+            <TabsTrigger value="debug" data-testid="tab-debug">
+              <Bug className="h-4 w-4 mr-2" />
+              Debug
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="input" className="space-y-6">
@@ -792,6 +797,10 @@ export default function Home() {
               </TabsContent>
             );
           })}
+
+          <TabsContent value="debug">
+            <DebugTab />
+          </TabsContent>
         </Tabs>
       </main>
 
