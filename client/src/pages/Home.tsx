@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -783,6 +784,11 @@ export default function Home() {
         <DialogContent data-testid="dialog-cable-form">
           <DialogHeader>
             <DialogTitle>{editingCable ? "Edit Cable" : "Add New Cable"}</DialogTitle>
+            <DialogDescription>
+              {editingCable 
+                ? "Update cable details and circuit information" 
+                : "Create a new cable with circuits for splicing"}
+            </DialogDescription>
           </DialogHeader>
           <CableForm
             cable={editingCable || undefined}
@@ -823,6 +829,9 @@ export default function Home() {
         <DialogContent data-testid="dialog-save-filename">
           <DialogHeader>
             <DialogTitle>Save Project</DialogTitle>
+            <DialogDescription>
+              Download your project as a JSON file to save your cables and circuits
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

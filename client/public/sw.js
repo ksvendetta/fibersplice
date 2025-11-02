@@ -155,5 +155,9 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+    // Send acknowledgment to prevent "no response" warnings
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({ success: true });
+    }
   }
 });
