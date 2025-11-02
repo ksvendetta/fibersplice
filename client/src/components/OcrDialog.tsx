@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Camera, Upload, Copy, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cleanOcrText } from "@/lib/circuitIdUtils";
+import { logger } from "@/lib/logger";
 
 interface OcrDialogProps {
   open: boolean;
@@ -81,6 +82,8 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
     setExtractedText("");
 
     try {
+      await logger.info('ocr', 'OCR processing started');
+      
       const worker = await createWorker('eng', 1, {
         logger: (m) => {
           if (m.status === 'recognizing text') {
@@ -98,9 +101,17 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
       
       await worker.terminate();
       
+      await logger.info('ocr', 'OCR text extracted successfully', {
+        rawTextLength: text.length,
+        cleanedTextLength: cleanedText.length,
+        cleanedText: cleanedText.substring(0, 100) // Log first 100 chars
+      });
+      
       toast({ title: "Text extracted successfully" });
     } catch (error) {
-      console.error('OCR Error:', error);
+      await logger.error('ocr', 'OCR processing failed', {
+        error: error instanceof Error ? error.message : String(error)
+      });
       toast({ 
         title: "Failed to process image", 
         description: "Please try a clearer image",

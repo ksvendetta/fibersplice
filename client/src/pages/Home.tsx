@@ -27,6 +27,7 @@ import { CircuitManagement } from "@/components/CircuitManagement";
 import { Plus, Cable as CableIcon, Workflow, Save, Upload, RotateCcw, Edit2, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { logger } from "@/lib/logger";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import {
@@ -142,19 +143,11 @@ export default function Home() {
     setSaveDialogOpen(true);
   };
 
-  const handleSaveConfirm = () => {
+  const handleSaveConfirm = async () => {
     const projectData = {
       cables,
       circuits: allCircuits,
     };
-    
-    // Debug logging
-    console.log('Saving project data:', {
-      cablesCount: cables.length,
-      circuitsCount: allCircuits.length,
-      cables,
-      circuits: allCircuits
-    });
     
     const dataStr = JSON.stringify(projectData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -173,6 +166,11 @@ export default function Home() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    
+    await logger.info('file', `Project saved to file: ${filename}`, {
+      cablesCount: cables.length,
+      circuitsCount: allCircuits.length
+    });
     
     setSaveDialogOpen(false);
     setSaveFileName("");
@@ -196,16 +194,10 @@ export default function Home() {
         const projectData = JSON.parse(text);
         
         if (!projectData.cables || !projectData.circuits) {
+          await logger.error('file', 'Invalid project file format', { filename: file.name });
           toast({ title: "Invalid project file format", variant: "destructive" });
           return;
         }
-        
-        console.log('Loading project data:', {
-          cablesCount: projectData.cables.length,
-          circuitsCount: projectData.circuits.length,
-          cables: projectData.cables,
-          circuits: projectData.circuits
-        });
         
         // Clear ALL existing data first
         await apiRequest("DELETE", "/api/reset", undefined);
@@ -218,6 +210,11 @@ export default function Home() {
         await db.cables.bulkAdd(projectData.cables);
         await db.circuits.bulkAdd(projectData.circuits);
         
+        await logger.info('file', `Project loaded from file: ${file.name}`, {
+          cablesCount: projectData.cables.length,
+          circuitsCount: projectData.circuits.length
+        });
+        
         // Invalidate queries to refresh the UI
         queryClient.invalidateQueries({ queryKey: ["/api/cables"] });
         queryClient.invalidateQueries({ queryKey: ["/api/circuits"] });
@@ -227,7 +224,10 @@ export default function Home() {
           description: `${projectData.cables.length} cable(s) and ${projectData.circuits.length} circuit(s) restored`
         });
       } catch (error) {
-        console.error('Load error:', error);
+        await logger.error('file', 'Failed to load project file', { 
+          filename: file.name,
+          error: error instanceof Error ? error.message : String(error)
+        });
         toast({ title: "Failed to load project file", variant: "destructive" });
       }
     };

@@ -1,6 +1,7 @@
 import { db } from './db';
 import type { Cable, Circuit, Save, InsertCable, InsertCircuit } from '@/../../shared/schema';
 import { nanoid } from 'nanoid';
+import { logger } from './logger';
 
 // Storage service using IndexedDB (Dexie)
 export const storage = {
@@ -20,17 +21,30 @@ export const storage = {
       ...cable
     };
     await db.cables.add(newCable);
+    await logger.info('cable', `Cable created: ${newCable.name}`, { 
+      id: newCable.id, 
+      type: newCable.type, 
+      fiberCount: newCable.fiberCount 
+    });
     return newCable;
   },
 
   async updateCable(id: string, updates: Partial<Cable>): Promise<void> {
+    const cable = await db.cables.get(id);
     await db.cables.update(id, updates);
+    await logger.info('cable', `Cable updated: ${cable?.name || id}`, { id, updates });
   },
 
   async deleteCable(id: string): Promise<void> {
+    const cable = await db.cables.get(id);
+    const circuitCount = await db.circuits.where('cableId').equals(id).count();
     // Delete associated circuits first
     await db.circuits.where('cableId').equals(id).delete();
     await db.cables.delete(id);
+    await logger.info('cable', `Cable deleted: ${cable?.name || id}`, { 
+      id, 
+      circuitsDeleted: circuitCount 
+    });
   },
 
   // Circuit operations
@@ -59,15 +73,38 @@ export const storage = {
       feedFiberEnd: null
     };
     await db.circuits.add(newCircuit);
+    await logger.info('circuit', `Circuit created: ${newCircuit.circuitId}`, {
+      id: newCircuit.id,
+      cableId: newCircuit.cableId,
+      fiberStart: newCircuit.fiberStart,
+      fiberEnd: newCircuit.fiberEnd
+    });
     return newCircuit;
   },
 
   async updateCircuit(id: string, updates: Partial<Circuit>): Promise<void> {
+    const circuit = await db.circuits.get(id);
     await db.circuits.update(id, updates);
+    
+    // Special logging for splice operations
+    if ('isSpliced' in updates) {
+      const action = updates.isSpliced === 1 ? 'spliced' : 'unspliced';
+      await logger.info('circuit', `Circuit ${action}: ${circuit?.circuitId || id}`, { 
+        id, 
+        updates 
+      });
+    } else {
+      await logger.info('circuit', `Circuit updated: ${circuit?.circuitId || id}`, { 
+        id, 
+        updates 
+      });
+    }
   },
 
   async deleteCircuit(id: string): Promise<void> {
+    const circuit = await db.circuits.get(id);
     await db.circuits.delete(id);
+    await logger.info('circuit', `Circuit deleted: ${circuit?.circuitId || id}`, { id });
   },
 
   // Save operations
