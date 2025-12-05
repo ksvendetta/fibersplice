@@ -288,7 +288,7 @@ export default function Home() {
           <TabsList className="mb-6" data-testid="tabs-main">
             <TabsTrigger value="input" data-testid="tab-input-data">
               <CableIcon className="h-4 w-4 mr-2" />
-              InputData
+              Home
             </TabsTrigger>
             {distributionCables.map((distCable) => (
               <TabsTrigger 
@@ -559,7 +559,7 @@ export default function Home() {
                       <div className="text-center py-12 text-muted-foreground">Loading circuits...</div>
                     ) : cableSplicedCircuits.length === 0 ? (
                       <div className="text-center py-12 text-muted-foreground" data-testid={`text-no-spliced-circuits-${distCable.id}`}>
-                        No circuits marked as spliced yet for {distCable.name}. Check circuits in the InputData tab.
+                        No circuits marked as spliced yet for {distCable.name}. Check circuits in the Home tab.
                       </div>
                     ) : (
                       <div className="rounded-md border overflow-x-auto">
