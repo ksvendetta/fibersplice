@@ -746,7 +746,7 @@ export default function Home() {
                                     
                                     ribbonRows.push(
                                       <TableRow key={`${circuit.id}-segment-${currentDistFiber}`} className={rowBgColor}>
-                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name} - {feedCable.fiberCount}</TableCell>
+                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name}-{feedCable.fiberCount}</TableCell>
                                         <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${feedRibbonColor.colorClass}`}>
                                           R{currentFeedRibbon}:{feedStrandStart}{feedStrandStart !== feedStrandEnd ? `-${feedStrandEnd}` : ''}
                                         </TableCell>
@@ -754,7 +754,7 @@ export default function Home() {
                                         <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${distRibbonColor.colorClass}`}>
                                           R{currentDistRibbon}:{distStrandStart}{distStrandStart !== distStrandEnd ? `-${distStrandEnd}` : ''}
                                         </TableCell>
-                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name} - {distributionCable?.fiberCount}</TableCell>
+                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name}-{distributionCable?.fiberCount}</TableCell>
                                       </TableRow>
                                     );
                                     
@@ -793,7 +793,7 @@ export default function Home() {
                                     
                                     fiberRows.push(
                                       <TableRow key={`${circuit.id}-fiber-${i}`} className={rowBgColor}>
-                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name} - {feedCable.fiberCount}</TableCell>
+                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name}-{feedCable.fiberCount}</TableCell>
                                         <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${feedRibbonColor.colorClass}`}>R{feedRibbon}</TableCell>
                                         <TableCell className="text-center py-1 px-2">
                                           <div className={`inline-block px-1.5 py-0.5 rounded border border-black ${feedColor.bg} ${feedColor.text} font-mono font-semibold text-xs`}>
@@ -807,7 +807,7 @@ export default function Home() {
                                           </div>
                                         </TableCell>
                                         <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${distRibbonColor.colorClass}`}>R{distRibbon}</TableCell>
-                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name} - {distributionCable?.fiberCount}</TableCell>
+                                        <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name}-{distributionCable?.fiberCount}</TableCell>
                                       </TableRow>
                                     );
                                   }
@@ -1018,7 +1018,7 @@ export default function Home() {
                                   
                                   ribbonRows.push(
                                     <TableRow key={`${circuit.id}-segment-${currentDistFiber}`} className={rowBgColor} data-testid={`row-ribbon-${circuit.id}-${currentDistFiber}`}>
-                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name} - {feedCable.fiberCount}</TableCell>
+                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name}-{feedCable.fiberCount}</TableCell>
                                       <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${feedRibbonColor.colorClass}`}>
                                         R{currentFeedRibbon}:{feedStrandStart}{feedStrandStart !== feedStrandEnd ? `-${feedStrandEnd}` : ''}
                                       </TableCell>
@@ -1026,7 +1026,7 @@ export default function Home() {
                                       <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${distRibbonColor.colorClass}`}>
                                         R{currentDistRibbon}:{distStrandStart}{distStrandStart !== distStrandEnd ? `-${distStrandEnd}` : ''}
                                       </TableCell>
-                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name} - {distributionCable?.fiberCount}</TableCell>
+                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name}-{distributionCable?.fiberCount}</TableCell>
                                     </TableRow>
                                   );
                                   
@@ -1068,7 +1068,7 @@ export default function Home() {
                                   
                                   fiberRows.push(
                                     <TableRow key={`${circuit.id}-fiber-${i}`} className={rowBgColor} data-testid={`row-fiber-${circuit.id}-${i}`}>
-                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name} - {feedCable.fiberCount}</TableCell>
+                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{feedCable.name}-{feedCable.fiberCount}</TableCell>
                                       <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${feedRibbonColor.colorClass}`}>R{feedRibbon}</TableCell>
                                       <TableCell className="text-center py-1 px-2">
                                         <div className={`inline-block px-1.5 py-0.5 rounded border border-black ${feedColor.bg} ${feedColor.text} font-mono font-semibold text-xs`}>
@@ -1082,7 +1082,7 @@ export default function Home() {
                                         </div>
                                       </TableCell>
                                       <TableCell className={`text-center font-mono font-semibold py-1 px-2 whitespace-nowrap ${distRibbonColor.colorClass}`}>R{distRibbon}</TableCell>
-                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name} - {distributionCable?.fiberCount}</TableCell>
+                                      <TableCell className="text-center font-mono py-1 px-2 whitespace-nowrap">{distributionCable?.name}-{distributionCable?.fiberCount}</TableCell>
                                     </TableRow>
                                   );
                                 }
