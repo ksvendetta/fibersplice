@@ -322,7 +322,7 @@ export default function Home() {
                 data-testid={`tab-splice-${distCable.id}`}
               >
                 <Workflow className="h-4 w-4 mr-2" />
-                Splice {distCable.name}
+                {distCable.name}
               </TabsTrigger>
             ))}
           </TabsList>
