@@ -641,18 +641,8 @@ export default function Home() {
               return (
                 <TabsContent key={`prefix-${prefix}`} value={`prefix-splice-${prefix}`}>
                   <Card>
-                    <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <CardHeader>
                       <CardTitle>{prefix} Splice</CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor={`view-toggle-prefix-${prefix}`} className="text-sm text-muted-foreground">Strands</Label>
-                        <Switch
-                          id={`view-toggle-prefix-${prefix}`}
-                          checked={useRibbonView}
-                          onCheckedChange={setUseRibbonView}
-                          data-testid={`switch-view-mode-prefix-${prefix}`}
-                        />
-                        <Label htmlFor={`view-toggle-prefix-${prefix}`} className="text-sm text-muted-foreground">Ribbons</Label>
-                      </div>
                     </CardHeader>
                     <CardContent>
                       {prefixCircuits.length === 0 ? (
@@ -664,10 +654,25 @@ export default function Home() {
                           <Table className="text-sm w-auto">
                             <TableHeader>
                               <TableRow className="bg-muted/50">
-                                <TableHead rowSpan={2} className="text-center font-semibold py-1 px-2 whitespace-nowrap">#</TableHead>
-                                <TableHead colSpan={useRibbonView ? 2 : 3} className="text-center font-semibold bg-green-100 dark:bg-green-950/50 py-1 px-2">Feed</TableHead>
+                                <TableHead rowSpan={3} className="text-center font-semibold py-1 px-2 whitespace-nowrap align-middle">#</TableHead>
+                                <TableHead colSpan={useRibbonView ? 2 : 3} rowSpan={2} className="text-center font-semibold bg-green-100 dark:bg-green-950/50 py-1 px-2 align-middle">Feed</TableHead>
+                                <TableHead className="text-center py-1 px-2">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Label htmlFor={`view-toggle-prefix-${prefix}`} className="text-xs text-muted-foreground">Strands</Label>
+                                    <Switch
+                                      id={`view-toggle-prefix-${prefix}`}
+                                      checked={useRibbonView}
+                                      onCheckedChange={setUseRibbonView}
+                                      data-testid={`switch-view-mode-prefix-${prefix}`}
+                                      className="scale-75"
+                                    />
+                                    <Label htmlFor={`view-toggle-prefix-${prefix}`} className="text-xs text-muted-foreground">Ribbons</Label>
+                                  </div>
+                                </TableHead>
+                                <TableHead colSpan={useRibbonView ? 2 : 3} rowSpan={2} className="text-center font-semibold bg-blue-100 dark:bg-blue-950/50 py-1 px-2 align-middle">Distribution</TableHead>
+                              </TableRow>
+                              <TableRow className="bg-muted/50">
                                 <TableHead className="text-center font-semibold py-1 px-2 whitespace-nowrap">Splices : {totalSpliceRows}</TableHead>
-                                <TableHead colSpan={useRibbonView ? 2 : 3} className="text-center font-semibold bg-blue-100 dark:bg-blue-950/50 py-1 px-2">Distribution</TableHead>
                               </TableRow>
                               <TableRow>
                                 <TableHead className="text-center py-1 px-2 whitespace-nowrap">Cable</TableHead>
@@ -887,18 +892,8 @@ export default function Home() {
             return (
               <TabsContent key={distCable.id} value={`splice-${distCable.id}`}>
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between gap-4">
+                  <CardHeader>
                     <CardTitle>Splice Mapping - {distCable.name}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor={`view-toggle-${distCable.id}`} className="text-sm text-muted-foreground">Strands</Label>
-                      <Switch
-                        id={`view-toggle-${distCable.id}`}
-                        checked={useRibbonView}
-                        onCheckedChange={setUseRibbonView}
-                        data-testid={`switch-view-mode-${distCable.id}`}
-                      />
-                      <Label htmlFor={`view-toggle-${distCable.id}`} className="text-sm text-muted-foreground">Ribbons</Label>
-                    </div>
                   </CardHeader>
                   <CardContent>
                     {circuitsLoading ? (
@@ -912,10 +907,25 @@ export default function Home() {
                         <Table className="text-sm w-auto">
                           <TableHeader>
                             <TableRow className="bg-muted/50">
-                              <TableHead rowSpan={2} className="text-center font-semibold py-1 px-2 whitespace-nowrap">#</TableHead>
-                              <TableHead colSpan={useRibbonView ? 2 : 3} className="text-center font-semibold bg-green-100 dark:bg-green-950/50 py-1 px-2">Feed</TableHead>
+                              <TableHead rowSpan={3} className="text-center font-semibold py-1 px-2 whitespace-nowrap align-middle">#</TableHead>
+                              <TableHead colSpan={useRibbonView ? 2 : 3} rowSpan={2} className="text-center font-semibold bg-green-100 dark:bg-green-950/50 py-1 px-2 align-middle">Feed</TableHead>
+                              <TableHead className="text-center py-1 px-2">
+                                <div className="flex items-center justify-center gap-1">
+                                  <Label htmlFor={`view-toggle-${distCable.id}`} className="text-xs text-muted-foreground">Strands</Label>
+                                  <Switch
+                                    id={`view-toggle-${distCable.id}`}
+                                    checked={useRibbonView}
+                                    onCheckedChange={setUseRibbonView}
+                                    data-testid={`switch-view-mode-${distCable.id}`}
+                                    className="scale-75"
+                                  />
+                                  <Label htmlFor={`view-toggle-${distCable.id}`} className="text-xs text-muted-foreground">Ribbons</Label>
+                                </div>
+                              </TableHead>
+                              <TableHead colSpan={useRibbonView ? 2 : 3} rowSpan={2} className="text-center font-semibold bg-blue-100 dark:bg-blue-950/50 py-1 px-2 align-middle">Distribution</TableHead>
+                            </TableRow>
+                            <TableRow className="bg-muted/50">
                               <TableHead className="text-center font-semibold py-1 px-2 whitespace-nowrap">Splices : {totalSpliceRows}</TableHead>
-                              <TableHead colSpan={useRibbonView ? 2 : 3} className="text-center font-semibold bg-blue-100 dark:bg-blue-950/50 py-1 px-2">Distribution</TableHead>
                             </TableRow>
                             <TableRow>
                               <TableHead className="text-center py-1 px-2 whitespace-nowrap">Cable</TableHead>
@@ -1171,18 +1181,8 @@ export default function Home() {
             return (
               <TabsContent key={`feed-${feedCable.id}`} value={`feed-splice-${feedCable.id}`}>
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between gap-4">
+                  <CardHeader>
                     <CardTitle>Splice Mapping - {feedCable.name}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor={`view-toggle-feed-${feedCable.id}`} className="text-sm text-muted-foreground">Strands</Label>
-                      <Switch
-                        id={`view-toggle-feed-${feedCable.id}`}
-                        checked={useRibbonView}
-                        onCheckedChange={setUseRibbonView}
-                        data-testid={`switch-view-mode-feed-${feedCable.id}`}
-                      />
-                      <Label htmlFor={`view-toggle-feed-${feedCable.id}`} className="text-sm text-muted-foreground">Ribbons</Label>
-                    </div>
                   </CardHeader>
                   <CardContent>
                     {circuitsLoading ? (
@@ -1196,10 +1196,25 @@ export default function Home() {
                         <Table className="text-sm w-auto">
                           <TableHeader>
                             <TableRow className="bg-muted/50">
-                              <TableHead rowSpan={2} className="text-center font-semibold py-1 px-2 whitespace-nowrap">#</TableHead>
-                              <TableHead colSpan={useRibbonView ? 2 : 3} className="text-center font-semibold bg-green-100 dark:bg-green-950/50 py-1 px-2">Feed</TableHead>
+                              <TableHead rowSpan={3} className="text-center font-semibold py-1 px-2 whitespace-nowrap align-middle">#</TableHead>
+                              <TableHead colSpan={useRibbonView ? 2 : 3} rowSpan={2} className="text-center font-semibold bg-green-100 dark:bg-green-950/50 py-1 px-2 align-middle">Feed</TableHead>
+                              <TableHead className="text-center py-1 px-2">
+                                <div className="flex items-center justify-center gap-1">
+                                  <Label htmlFor={`view-toggle-feed-${feedCable.id}`} className="text-xs text-muted-foreground">Strands</Label>
+                                  <Switch
+                                    id={`view-toggle-feed-${feedCable.id}`}
+                                    checked={useRibbonView}
+                                    onCheckedChange={setUseRibbonView}
+                                    data-testid={`switch-view-mode-feed-${feedCable.id}`}
+                                    className="scale-75"
+                                  />
+                                  <Label htmlFor={`view-toggle-feed-${feedCable.id}`} className="text-xs text-muted-foreground">Ribbons</Label>
+                                </div>
+                              </TableHead>
+                              <TableHead colSpan={useRibbonView ? 2 : 3} rowSpan={2} className="text-center font-semibold bg-blue-100 dark:bg-blue-950/50 py-1 px-2 align-middle">Distribution</TableHead>
+                            </TableRow>
+                            <TableRow className="bg-muted/50">
                               <TableHead className="text-center font-semibold py-1 px-2 whitespace-nowrap">Splices : {totalSpliceRows}</TableHead>
-                              <TableHead colSpan={useRibbonView ? 2 : 3} className="text-center font-semibold bg-blue-100 dark:bg-blue-950/50 py-1 px-2">Distribution</TableHead>
                             </TableRow>
                             <TableRow>
                               <TableHead className="text-center py-1 px-2 whitespace-nowrap">Cable</TableHead>
