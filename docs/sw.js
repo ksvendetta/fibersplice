@@ -9,9 +9,9 @@ self.addEventListener('install', (event) => {
       console.log('Service Worker: Caching app shell');
       // Cache the basic shell - other assets will be cached on first request
       return cache.addAll([
-        '/',
-        '/index.html',
-        '/manifest.json'
+        '/FiberMapConnect/',
+        '/FiberMapConnect/index.html',
+        '/FiberMapConnect/manifest.json'
       ]);
     })
   );
@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // API requests - Network First strategy (with cache fallback)
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.startsWith('/FiberMapConnect/api/')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -142,7 +142,7 @@ self.addEventListener('fetch', (event) => {
         
         // Return offline page for navigation requests
         if (request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('/FiberMapConnect/index.html');
         }
         
         throw error;
