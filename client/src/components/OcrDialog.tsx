@@ -10,9 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Camera, Upload, Copy, CheckCircle2 } from "lucide-react";
+import { Camera, Upload, Copy, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cleanOcrText } from "@/lib/circuitIdUtils";
+import { preprocessImageForOCR } from "@/lib/imagePreprocess";
 
 interface OcrDialogProps {
   open: boolean;
@@ -27,6 +28,8 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [processedImage, setProcessedImage] = useState<string>("");
+  const [showProcessed, setShowProcessed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,29 +84,37 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
     setExtractedText("");
 
     try {
+      // Preprocess the image for better OCR accuracy
+      setProgress(5);
+      const enhanced = await preprocessImageForOCR(selectedImage);
+      setProcessedImage(enhanced);
+      setProgress(10);
+
       const worker = await createWorker('eng', 1, {
         logger: (m) => {
           if (m.status === 'recognizing text') {
-            setProgress(Math.round(m.progress * 100));
+            // Scale progress: 10-100% for the recognition phase
+            setProgress(10 + Math.round(m.progress * 90));
           }
         },
       });
 
-      const { data: { text } } = await worker.recognize(selectedImage);
-      
+      // Use the preprocessed image for recognition
+      const { data: { text } } = await worker.recognize(enhanced);
+
       // Clean the OCR text using the circuit ID cleaning function
       const cleanedText = cleanOcrText(text);
-      
+
       setExtractedText(cleanedText);
-      
+
       await worker.terminate();
-      
+
       toast({ title: "Text extracted successfully" });
     } catch (error) {
-      toast({ 
-        title: "Failed to process image", 
+      toast({
+        title: "Failed to process image",
         description: "Please try a clearer image",
-        variant: "destructive" 
+        variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
@@ -125,6 +136,8 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
       // Reset state
       setSelectedImage("");
       setExtractedText("");
+      setProcessedImage("");
+      setShowProcessed(false);
       toast({ title: "Text added to Circuit IDs" });
     }
   };
@@ -171,11 +184,28 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
           {/* Image Preview */}
           {selectedImage && (
             <div className="border rounded-md p-4 bg-muted">
-              <img 
-                src={selectedImage} 
-                alt="Selected" 
-                className="max-w-full max-h-64 mx-auto object-contain"
-              />
+              <div className="relative">
+                <img
+                  src={showProcessed && processedImage ? processedImage : selectedImage}
+                  alt={showProcessed ? "Preprocessed" : "Original"}
+                  className="max-w-full max-h-64 mx-auto object-contain"
+                />
+                {processedImage && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="absolute top-2 right-2 opacity-80 hover:opacity-100"
+                    onClick={() => setShowProcessed(!showProcessed)}
+                    title={showProcessed ? "Show original" : "Show preprocessed"}
+                  >
+                    {showProcessed ? (
+                      <><EyeOff className="h-3 w-3 mr-1" /> Original</>
+                    ) : (
+                      <><Eye className="h-3 w-3 mr-1" /> Enhanced</>
+                    )}
+                  </Button>
+                )}
+              </div>
               <Button
                 onClick={performOCR}
                 disabled={isProcessing}
@@ -243,6 +273,8 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
                 onClick={() => {
                   setSelectedImage("");
                   setExtractedText("");
+                  setProcessedImage("");
+                  setShowProcessed(false);
                 }}
                 data-testid="button-clear-ocr"
               >
