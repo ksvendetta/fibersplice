@@ -14,6 +14,7 @@ import { Camera, Upload, Copy, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cleanOcrText } from "@/lib/circuitIdUtils";
 import { preprocessImageForOCR } from "@/lib/imagePreprocess";
+import { runPaddleOcr } from "@/lib/paddleOcr";
 
 interface OcrDialogProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
   const [copied, setCopied] = useState(false);
   const [processedImage, setProcessedImage] = useState<string>("");
   const [showProcessed, setShowProcessed] = useState(false);
+  const [ocrEngine, setOcrEngine] = useState<"paddle" | "tesseract" | "">("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,18 +64,38 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
           }
         }
       }
-      toast({ 
-        title: "No image found in clipboard", 
+      toast({
+        title: "No image found in clipboard",
         description: "Take a screenshot (Windows: Win+Shift+S, Mac: Cmd+Shift+4) and try again",
-        variant: "destructive" 
+        variant: "destructive"
       });
     } catch (error) {
-      toast({ 
-        title: "Clipboard access failed", 
+      toast({
+        title: "Clipboard access failed",
         description: "Please upload an image file instead",
-        variant: "destructive" 
+        variant: "destructive"
       });
     }
+  };
+
+  const runTesseractOcr = async (imageSource: string): Promise<string> => {
+    setOcrEngine("tesseract");
+
+    const enhanced = await preprocessImageForOCR(imageSource);
+    setProcessedImage(enhanced);
+    setProgress(10);
+
+    const worker = await createWorker('eng', 1, {
+      logger: (m) => {
+        if (m.status === 'recognizing text') {
+          setProgress(10 + Math.round(m.progress * 90));
+        }
+      },
+    });
+
+    const { data: { text } } = await worker.recognize(enhanced);
+    await worker.terminate();
+    return text;
   };
 
   const performOCR = async () => {
@@ -82,34 +104,42 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
     setIsProcessing(true);
     setProgress(0);
     setExtractedText("");
+    setOcrEngine("");
 
     try {
-      // Preprocess the image for better OCR accuracy
       setProgress(5);
-      const enhanced = await preprocessImageForOCR(selectedImage);
-      setProcessedImage(enhanced);
-      setProgress(10);
 
-      const worker = await createWorker('eng', 1, {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            // Scale progress: 10-100% for the recognition phase
-            setProgress(10 + Math.round(m.progress * 90));
-          }
-        },
-      });
+      // Try PaddleOCR first (more accurate)
+      let rawText: string | null = null;
 
-      // Use the preprocessed image for recognition
-      const { data: { text } } = await worker.recognize(enhanced);
+      try {
+        setOcrEngine("paddle");
+        setProgress(10);
+        const paddleResult = await runPaddleOcr(selectedImage);
+        if (paddleResult && paddleResult.text.trim()) {
+          rawText = paddleResult.text;
+          setProgress(90);
+        }
+      } catch (err) {
+        console.warn("PaddleOCR failed, falling back to Tesseract:", err);
+      }
+
+      // Fall back to Tesseract if PaddleOCR didn't produce results
+      if (!rawText) {
+        rawText = await runTesseractOcr(selectedImage);
+      }
+
+      setProgress(95);
 
       // Clean the OCR text using the circuit ID cleaning function
-      const cleanedText = cleanOcrText(text);
-
+      const cleanedText = cleanOcrText(rawText);
       setExtractedText(cleanedText);
+      setProgress(100);
 
-      await worker.terminate();
-
-      toast({ title: "Text extracted successfully" });
+      toast({
+        title: "Text extracted successfully",
+        description: `Engine: ${ocrEngine === "paddle" ? "PaddleOCR" : "Tesseract"}`,
+      });
     } catch (error) {
       toast({
         title: "Failed to process image",
@@ -138,6 +168,7 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
       setExtractedText("");
       setProcessedImage("");
       setShowProcessed(false);
+      setOcrEngine("");
       toast({ title: "Text added to Circuit IDs" });
     }
   };
@@ -222,7 +253,12 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
             <div className="space-y-2">
               <Progress value={progress} className="w-full" />
               <p className="text-sm text-center text-muted-foreground">
-                Processing image... {progress}%
+                {ocrEngine === "paddle"
+                  ? "Processing with PaddleOCR..."
+                  : ocrEngine === "tesseract"
+                    ? "Processing with Tesseract (fallback)..."
+                    : "Initializing OCR..."}
+                {" "}{progress}%
               </p>
             </div>
           )}
@@ -275,6 +311,7 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
                   setExtractedText("");
                   setProcessedImage("");
                   setShowProcessed(false);
+                  setOcrEngine("");
                 }}
                 data-testid="button-clear-ocr"
               >
@@ -293,14 +330,14 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
           {!selectedImage && (
             <div className="text-sm text-muted-foreground space-y-3 border rounded-md p-4 bg-muted/50">
               <div className="bg-primary/10 border border-primary/20 rounded p-3">
-                <p className="font-semibold text-primary mb-2">💡 Recommended: Snip Part of Screen</p>
+                <p className="font-semibold text-primary mb-2">Recommended: Snip Part of Screen</p>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li><strong>Windows:</strong> Press <kbd className="px-2 py-1 bg-background border rounded text-xs">Win+Shift+S</kbd> → Drag to select region</li>
                   <li><strong>Mac:</strong> Press <kbd className="px-2 py-1 bg-background border rounded text-xs">Cmd+Shift+4</kbd> → Drag to select region</li>
                   <li>Click <strong>"Paste"</strong> button above → Your snippet appears!</li>
                 </ol>
               </div>
-              
+
               <div>
                 <p className="font-medium">Alternative:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
@@ -311,6 +348,7 @@ export function OcrDialog({ open, onOpenChange, onTextExtracted }: OcrDialogProp
               <div>
                 <p className="font-medium">Tips for best OCR results:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                  <li>Uses PaddleOCR (PP-OCRv4) with Tesseract.js fallback</li>
                   <li>Use clear, high-contrast images</li>
                   <li>Ensure text is horizontal and legible</li>
                   <li>Works best with printed text (not handwriting)</li>

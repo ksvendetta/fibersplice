@@ -2,12 +2,25 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 
 export default defineConfig({
   base: '/FiberMapConnect/',
   plugins: [
     react(),
     runtimeErrorOverlay(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: path.resolve(import.meta.dirname, "node_modules/@gutenye/ocr-models/assets").replace(/\\/g, "/") + "/{ch_PP-OCRv4_det_infer.onnx,ch_PP-OCRv4_rec_infer.onnx,ppocr_keys_v1.txt}",
+          dest: "models",
+        },
+        {
+          src: path.resolve(import.meta.dirname, "node_modules/onnxruntime-web/dist").replace(/\\/g, "/") + "/*.wasm",
+          dest: ".",
+        },
+      ],
+    }),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -32,6 +45,10 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
   },
+  optimizeDeps: {
+    exclude: ["onnxruntime-web"],
+  },
+  assetsInclude: ["**/*.onnx"],
   server: {
     fs: {
       strict: true,
