@@ -8,8 +8,25 @@ vite.config.ts.*
 .env.local
 .replit
 replit.nix
+replit.md
 scripts/create-github-repo.mjs
 /tmp
 *.log
+
+# Development and debugging files
+*.db
+*.db-*
+nul
+.claude/
+attached_assets/
+
 # Electron release builds (too large for GitHub)
 release/
+
+# Screenshot and test images (keep PWA icons)
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+!client/public/*.png
+!docs/*.png
