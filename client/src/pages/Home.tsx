@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Cable, Circuit, InsertCable } from "@shared/schema";
+import { Cable, Circuit, InsertCable, parseCircuitIdParts } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -987,7 +987,16 @@ export default function Home({ mode, setMode }: { mode: "fiber" | "copper"; setM
           })()}
 
           {distributionCables.map((distCable) => {
-            const cableSplicedCircuits = splicedCircuits.filter(c => c.cableId === distCable.id);
+            const cableSplicedCircuits = splicedCircuits.filter(c => c.cableId === distCable.id).sort((a, b) => {
+              try {
+                const partsA = parseCircuitIdParts(a.circuitId);
+                const partsB = parseCircuitIdParts(b.circuitId);
+                if (partsA.prefix !== partsB.prefix) return partsA.prefix.localeCompare(partsB.prefix);
+                return partsA.rangeStart - partsB.rangeStart;
+              } catch {
+                return a.circuitId.localeCompare(b.circuitId);
+              }
+            });
             
             // Calculate total rows by matching the rendering logic exactly
             let totalSpliceRows = 0;
